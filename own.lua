@@ -1,6 +1,7 @@
 --[[
     Voidware UI Library
-    Fixed: Resize not working, Resize Grip visible & functional
+    ✅ Optimized for ANDROID / Touch Screen
+    ✅ Fully working: Drag, Resize, Scroll, Search
 ]]
 
 local TweenService = game:GetService("TweenService")
@@ -11,13 +12,13 @@ local LocalPlayer = Players.LocalPlayer
 local MyUILib = {}
 MyUILib.__index = MyUILib
 
--- 🧩 Load Lucide Icons
+-- 🧩 Load Icons
 local Lucide = nil
 pcall(function()
     Lucide = loadstring(game:HttpGet("https://raw.githubusercontent.com/latte-soft/lucide-roblox/refs/heads/master/lib/Icons.luau"))()
 end)
 
--- 🎨 THEME SETTINGS
+-- 🎨 SETTINGS
 MyUILib.Theme = {
     WindowBg = Color3.fromRGB(216, 128, 255),
     SidebarBg = Color3.fromRGB(90, 30, 130),
@@ -29,29 +30,24 @@ MyUILib.Theme = {
     ResizeGripColor = Color3.new(1, 1, 1),
     IconColor = Color3.new(1, 1, 1),
     TextColor = Color3.new(1, 1, 1),
-    HeaderIcon = "user-round",
     HeaderTitle = "Voidware",
     HeaderSubtitle = "discord.gg/voidware",
     HeaderFont = Enum.Font.GothamBold,
-    HeaderTextSize = 15,
-    HeaderSubtitleSize = 11,
+    HeaderTextSize = 16,
+    HeaderSubtitleSize = 12,
     CornerRadius = UDim.new(0, 10),
 
-    -- Sizes & Limits
-    NormalWindowSize = UDim2.new(0, 650, 0, 450),
-    NormalWindowPos = UDim2.new(0.5, -325, 0.5, -225),
-    MinimizedBarSize = UDim2.new(0, 240, 0, 36),
-    MinimizedBarPos = UDim2.new(0.5, -120, 0, 12),
-    HeaderHeight = 36,
-    SidebarWidth = 160,
-    MinWindowWidth = 420,   -- Hindi pwedeng lumiit pa rito
-    MinWindowHeight = 280,  -- Hindi pwedeng lumiit pa rito
-    ResizeGripSize = 28,
+    NormalWindowSize = UDim2.new(0, 600, 0, 400),
+    NormalWindowPos = UDim2.new(0.5, -300, 0.5, -200),
+    MinimizedBarSize = UDim2.new(0, 220, 0, 38),
+    MinimizedBarPos = UDim2.new(0.5, -110, 0, 20),
+    HeaderHeight = 38,
+    SidebarWidth = 150,
+    MinWindowWidth = 380,
+    MinWindowHeight = 260,
+    ResizeGripSize = 36, -- Mas malaki para madaling pindutin sa touch
 
-    -- Animations
-    TweenTime = 0.3,
-    TweenStyle = Enum.EasingStyle.Quad,
-    TweenDirection = Enum.EasingDirection.Out,
+    TweenTime = 0.25,
     NormalTransparency = 0,
     MinimizedTransparency = 0.4
 }
@@ -72,15 +68,14 @@ end
 
 -- 🪟 CREATE WINDOW
 function MyUILib:CreateWindow()
-    -- ✅ ScreenGui Setup
+    -- ScreenGui
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VoidwareUI"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    ScreenGui.DisplayOrder = 999
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-    -- ✅ Main Window
+    -- Main Window
     local Window = Base.new("Frame", {
         BackgroundColor3 = self.Theme.WindowBg,
         BackgroundTransparency = self.Theme.NormalTransparency,
@@ -91,109 +86,60 @@ function MyUILib:CreateWindow()
         ZIndex = 10,
         Parent = ScreenGui
     })
-
     Instance.new("UICorner", Window.Instance).CornerRadius = self.Theme.CornerRadius
-    local Border = Instance.new("UIStroke", Window.Instance)
-    Border.Color = Color3.new(0, 0, 0)
-    Border.Transparency = 0.8
-    Border.Thickness = 1
+    Instance.new("UIStroke", Window.Instance).Color = Color3.new(0,0,0)
 
-    -- 📌 HEADER / DRAG AREA
+    -- 📌 DRAG AREA
     local DragArea = Base.new("Frame", {
         Size = UDim2.new(1, 0, 0, self.Theme.HeaderHeight),
         BackgroundTransparency = 1,
+        Active = true,
+        ZIndex = 20,
         Parent = Window.Instance
     })
 
-    -- Header Content
-    local HeaderContainer = Base.new("Frame", {
-        Size = UDim2.new(1, -100, 1, 0),
-        Position = UDim2.new(0, 12, 0, 0),
-        BackgroundTransparency = 1,
-        Parent = DragArea.Instance
-    })
-
-    local HeaderIcon = Base.new("ImageLabel", {
-        Size = UDim2.new(0, 24, 0, 24),
-        Position = UDim2.new(0, 0, 0.5, -12),
-        BackgroundTransparency = 1,
-        ImageColor3 = self.Theme.IconColor,
-        Parent = HeaderContainer.Instance
-    })
-    if Lucide and Lucide["48px"][self.Theme.HeaderIcon] then
-        HeaderIcon.Instance.Image = "rbxassetid://" .. Lucide["48px"][self.Theme.HeaderIcon][1]
-        HeaderIcon.Instance.ImageRectSize = Vector2.new(unpack(Lucide["48px"][self.Theme.HeaderIcon][2]))
-        HeaderIcon.Instance.ImageRectOffset = Vector2.new(unpack(Lucide["48px"][self.Theme.HeaderIcon][3]))
-    end
-
-    local TextContainer = Base.new("Frame", {
-        Size = UDim2.new(1, -34, 1, 0),
-        Position = UDim2.new(0, 34, 0, 2),
-        BackgroundTransparency = 1,
-        Parent = HeaderContainer.Instance
-    })
-
+    -- Header Text
     Base.new("TextLabel", {
         Text = self.Theme.HeaderTitle,
         Font = self.Theme.HeaderFont,
         TextSize = self.Theme.HeaderTextSize,
         TextColor3 = self.Theme.TextColor,
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 16),
+        Size = UDim2.new(1, -100, 0, 20),
+        Position = UDim2.new(0, 12, 0, 4),
         TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = TextContainer.Instance
-    })
-
-    Base.new("TextLabel", {
-        Text = self.Theme.HeaderSubtitle,
-        Font = Enum.Font.Gotham,
-        TextSize = self.Theme.HeaderSubtitleSize,
-        TextColor3 = self.Theme.TextColor,
-        TextTransparency = 0.35,
-        BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 0, 12),
-        Position = UDim2.new(0, 0, 0, 16),
-        TextXAlignment = Enum.TextXAlignment.Left,
-        Parent = TextContainer.Instance
+        Parent = DragArea.Instance
     })
 
     -- Control Buttons
     local Controls = Base.new("Frame", {
-        Size = UDim2.new(0, 88, 0, 28),
+        Size = UDim2.new(0, 90, 0, 30),
         Position = UDim2.new(1, -96, 0, 4),
         BackgroundTransparency = 1,
+        ZIndex = 25,
         Parent = DragArea.Instance
     })
 
-    local function CreateBtn(iconName, posX)
+    local function CreateBtn(txt, xPos)
         local Btn = Base.new("TextButton", {
-            Text = "",
-            Size = UDim2.new(0, 28, 0, 28),
-            Position = UDim2.new(0, posX, 0, 0),
+            Text = txt,
+            Font = Enum.Font.GothamBold,
+            TextSize = 16,
+            TextColor3 = self.Theme.TextColor,
             BackgroundTransparency = 1,
-            AutoButtonColor = false,
+            Size = UDim2.new(0, 30, 0, 30),
+            Position = UDim2.new(0, xPos, 0, 0),
+            ZIndex = 26,
             Parent = Controls.Instance
         })
-        local Icon = Base.new("ImageLabel", {
-            Size = UDim2.new(0, 14, 0, 14),
-            Position = UDim2.new(0.5, -7, 0.5, -7),
-            BackgroundTransparency = 1,
-            ImageColor3 = self.Theme.IconColor,
-            Parent = Btn.Instance
-        })
-        if Lucide and Lucide["48px"][iconName] then
-            Icon.Instance.Image = "rbxassetid://" .. Lucide["48px"][iconName][1]
-            Icon.Instance.ImageRectSize = Vector2.new(unpack(Lucide["48px"][iconName][2]))
-            Icon.Instance.ImageRectOffset = Vector2.new(unpack(Lucide["48px"][iconName][3]))
-        end
         return Btn
     end
 
-    local MinimizeBtn = CreateBtn("minus", 0)
-    local MaximizeBtn = CreateBtn("maximize", 32)
-    local CloseBtn = CreateBtn("x", 64)
+    local MinBtn = CreateBtn("—", 0)
+    local MaxBtn = CreateBtn("□", 30)
+    local CloseBtn = CreateBtn("✕", 60)
 
-    -- 📄 MAIN CONTAINER
+    -- 📄 MAIN CONTENT
     local MainContainer = Base.new("Frame", {
         Size = UDim2.new(1, 0, 1, -self.Theme.HeaderHeight),
         Position = UDim2.new(0, 0, 0, self.Theme.HeaderHeight),
@@ -202,7 +148,7 @@ function MyUILib:CreateWindow()
         Parent = Window.Instance
     })
 
-    -- 📌 LEFT SIDEBAR
+    -- 📌 SIDEBAR
     local Sidebar = Base.new("Frame", {
         Size = UDim2.new(0, self.Theme.SidebarWidth, 1, 0),
         BackgroundColor3 = self.Theme.SidebarBg,
@@ -213,7 +159,7 @@ function MyUILib:CreateWindow()
 
     -- Search Bar
     local SearchBox = Base.new("Frame", {
-        Size = UDim2.new(1, -12, 0, 36),
+        Size = UDim2.new(1, -12, 0, 40),
         Position = UDim2.new(0, 6, 0, 6),
         BackgroundColor3 = self.Theme.SearchBg,
         BackgroundTransparency = 0.15,
@@ -221,134 +167,77 @@ function MyUILib:CreateWindow()
     })
     Instance.new("UICorner", SearchBox.Instance).CornerRadius = UDim.new(0, 6)
 
-    local SearchIcon = Base.new("ImageLabel", {
-        Size = UDim2.new(0, 16, 0, 16),
-        Position = UDim2.new(0, 8, 0.5, -8),
-        BackgroundTransparency = 1,
-        ImageColor3 = self.Theme.TextColor,
-        Parent = SearchBox.Instance
-    })
-    if Lucide and Lucide["48px"]["search"] then
-        SearchIcon.Instance.Image = "rbxassetid://" .. Lucide["48px"]["search"][1]
-        SearchIcon.Instance.ImageRectSize = Vector2.new(unpack(Lucide["48px"]["search"][2]))
-        SearchIcon.Instance.ImageRectOffset = Vector2.new(unpack(Lucide["48px"]["search"][3]))
-    end
-
     local SearchInput = Base.new("TextBox", {
-        Size = UDim2.new(1, -32, 1, 0),
-        Position = UDim2.new(0, 32, 0, 0),
-        BackgroundTransparency = 1,
         Text = "",
-        PlaceholderText = "Search tabs...",
-        PlaceholderColor3 = Color3.new(0.8, 0.8, 0.8),
+        PlaceholderText = "Search...",
         Font = Enum.Font.Gotham,
-        TextSize = 14,
+        TextSize = 15,
         TextColor3 = self.Theme.TextColor,
-        TextXAlignment = Enum.TextXAlignment.Left,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, -20, 1, 0),
+        Position = UDim2.new(0, 10, 0, 0),
         ClearTextOnFocus = false,
         Parent = SearchBox.Instance
     })
 
-    -- ✅ SCROLLABLE SIDEBAR
+    -- Sidebar Scroll
     local SidebarScroll = Base.new("ScrollingFrame", {
-        Size = UDim2.new(1, 0, 1, -48),
-        Position = UDim2.new(0, 0, 0, 48),
+        Size = UDim2.new(1, 0, 1, -52),
+        Position = UDim2.new(0, 0, 0, 52),
         BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ScrollBarThickness = 6,
+        ScrollBarThickness = 8, -- Mas makapal para sa touch
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
-        VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
         CanvasSize = UDim2.new(0, 0, 0, 0),
         Parent = Sidebar.Instance
     })
+    Instance.new("UIPadding", SidebarScroll.Instance).Padding = UDim.new(0, 6)
 
-    -- 📌 RIGHT CONTENT AREA
+    -- Content Area
     local ContentScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, -self.Theme.SidebarWidth, 1, 0),
         Position = UDim2.new(0, self.Theme.SidebarWidth, 0, 0),
         BackgroundColor3 = self.Theme.ContentBg,
         BackgroundTransparency = 0.1,
-        BorderSizePixel = 0,
-        ScrollBarThickness = 6,
+        ScrollBarThickness = 8,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
-        VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
-        CanvasSize = UDim2.new(1, 0, 0, 300),
+        CanvasSize = UDim2.new(1, 0, 0, 500),
         Parent = MainContainer.Instance
     })
     Instance.new("UICorner", ContentScroll.Instance).CornerRadius = self.Theme.CornerRadius
 
-    -- 📋 TAB LIST
+    -- 📋 TABS
     local Tabs = {
-        {Name = "Search", Icon = "search"},
-        {Name = "Information", Icon = "info"},
-        {Name = "Fun", Icon = "star"},
-        {Name = "Main", Icon = "code"},
-        {Name = "Auto", Icon = "refresh-cw"},
-        {Name = "Update Focused", Icon = "crosshair"},
-        {Name = "Day Farm", Icon = "sun"},
-        {Name = "Night Farm", Icon = "moon"},
-        {Name = "Settings", Icon = "settings"},
-        {Name = "Credits", Icon = "user-check"}
+        "Information", "Main", "Auto", "Farm", "Settings", "Credits", "Debug"
     }
-
     local TabButtons = {}
-    local CurrentTab = nil
 
-    -- Create Tabs
-    for i, tabData in ipairs(Tabs) do
+    for i, name in ipairs(Tabs) do
         local TabBtn = Base.new("TextButton", {
-            Size = UDim2.new(1, -12, 0, 36),
-            Position = UDim2.new(0, 6, 0, (i-1)*42),
+            Text = name,
+            Font = Enum.Font.GothamSemibold,
+            TextSize = 15,
+            TextColor3 = self.Theme.TextColor,
             BackgroundTransparency = 1,
-            AutoButtonColor = false,
-            Text = "",
+            Size = UDim2.new(1, -12, 0, 42),
+            Position = UDim2.new(0, 6, 0, (i-1)*48),
             Parent = SidebarScroll.Instance
         })
         Instance.new("UICorner", TabBtn.Instance).CornerRadius = UDim.new(0, 6)
 
-        local TabIcon = Base.new("ImageLabel", {
-            Size = UDim2.new(0, 18, 0, 18),
-            Position = UDim2.new(0, 10, 0.5, -9),
-            BackgroundTransparency = 1,
-            ImageColor3 = self.Theme.TextColor,
-            Parent = TabBtn.Instance
-        })
-        if Lucide and Lucide["48px"][tabData.Icon] then
-            TabIcon.Instance.Image = "rbxassetid://" .. Lucide["48px"][tabData.Icon][1]
-            TabIcon.Instance.ImageRectSize = Vector2.new(unpack(Lucide["48px"][tabData.Icon][2]))
-            TabIcon.Instance.ImageRectOffset = Vector2.new(unpack(Lucide["48px"][tabData.Icon][3]))
-        end
-
-        Base.new("TextLabel", {
-            Text = tabData.Name,
-            Font = Enum.Font.GothamSemibold,
-            TextSize = 14,
-            TextColor3 = self.Theme.TextColor,
-            BackgroundTransparency = 1,
-            Size = UDim2.new(1, -40, 1, 0),
-            Position = UDim2.new(0, 36, 0, 0),
-            TextXAlignment = Enum.TextXAlignment.Left,
-            Parent = TabBtn.Instance
-        })
-
         TabBtn.Instance.Activated:Connect(function()
-            for _, btn in ipairs(TabButtons) do btn.Button.BackgroundTransparency = 1 end
+            for _, btn in ipairs(TabButtons) do btn.BackgroundTransparency = 1 end
             TabBtn.Instance.BackgroundTransparency = 0.7
             TabBtn.Instance.BackgroundColor3 = self.Theme.TabSelected
-            CurrentTab = tabData.Name
 
             ContentScroll.Instance:ClearAllChildren()
-            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 300)
-
             Base.new("TextLabel", {
-                Text = "Content: "..CurrentTab,
+                Text = "Tab: "..name,
                 Font = Enum.Font.GothamBold,
                 TextSize = 18,
                 TextColor3 = self.Theme.TextColor,
                 BackgroundTransparency = 1,
                 Size = UDim2.new(1, -20, 0, 30),
                 Position = UDim2.new(0, 10, 0, 10),
-                TextXAlignment = Enum.TextXAlignment.Left,
                 Parent = ContentScroll.Instance
             })
         end)
@@ -365,154 +254,131 @@ function MyUILib:CreateWindow()
             end
         end)
 
-        table.insert(TabButtons, {Button = TabBtn.Instance, Name = tabData.Name})
+        table.insert(TabButtons, TabBtn.Instance)
     end
 
-    SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, #Tabs * 42)
+    SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, #Tabs * 48)
 
     -- Search Function
     SearchInput.Instance:GetPropertyChangedSignal("Text"):Connect(function()
-        local searchText = SearchInput.Instance.Text:lower()
+        local txt = SearchInput.Instance.Text:lower()
         local offset = 0
-        for _, tab in ipairs(TabButtons) do
-            local match = tab.Name:lower():find(searchText)
-            tab.Button.Visible = match ~= nil
-            if match then tab.Button.Position = UDim2.new(0, 6, 0, offset); offset += 42 end
+        for i, btn in ipairs(TabButtons) do
+            local visible = btn.Text:lower():find(txt) ~= nil
+            btn.Visible = visible
+            if visible then
+                btn.Position = UDim2.new(0, 6, 0, offset)
+                offset += 48
+            end
         end
         SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, offset)
     end)
 
-    -- Set Default Tab
-    if #TabButtons > 0 then
-        TabButtons[1].Button.BackgroundTransparency = 0.7
-        TabButtons[1].Button.BackgroundColor3 = self.Theme.TabSelected
-    end
-
-    -- 🖱️ DRAG LOGIC
-    local IsMinimized = false
-    local TweenInfo = TweenInfo.new(self.Theme.TweenTime, self.Theme.TweenStyle, self.Theme.TweenDirection)
-    local Dragging, StartPos, StartInputPos = false, nil, nil
+    -- ✅ DRAG LOGIC (TOUCH SUPPORT)
+    local Dragging = false
+    local StartPos, StartInputPos
 
     DragArea.Instance.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            local mouse = Vector2.new(input.Position.X, input.Position.Y)
-            local cPos, cSize = Controls.Instance.AbsolutePosition, Controls.Instance.AbsoluteSize
-            if not (mouse.X >= cPos.X and mouse.X <= cPos.X + cSize.X and mouse.Y >= cPos.Y and mouse.Y <= cPos.Y + cSize.Y) then
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            local pos = Vector2.new(input.Position.X, input.Position.Y)
+            local cPos = Controls.Instance.AbsolutePosition
+            local cSize = Controls.Instance.AbsoluteSize
+            if not (pos.X >= cPos.X and pos.X <= cPos.X + cSize.X and pos.Y >= cPos.Y and pos.Y <= cPos.Y + cSize.Y) then
                 Dragging = true
                 StartPos = Window.Instance.Position
-                StartInputPos = Vector2.new(input.Position.X, input.Position.Y)
-                input.Changed:Connect(function(v) if v.UserInputState == Enum.UserInputState.End then Dragging = false end end)
+                StartInputPos = pos
             end
         end
     end)
 
     UserInputService.InputChanged:Connect(function(input)
-        if not Dragging or input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
-        local delta = Vector2.new(input.Position.X, input.Position.Y) - StartInputPos
-        Window.Instance.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + delta.X, StartPos.Y.Scale, StartPos.Y.Offset + delta.Y)
+        if not Dragging then return end
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = Vector2.new(input.Position.X, input.Position.Y) - StartInputPos
+            Window.Instance.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + delta.X, StartPos.Y.Scale, StartPos.Y.Offset + delta.Y)
+        end
     end)
 
-    -- ✅ RESIZE GRIP & LOGIC (NAYOS NA ITO)
-    local ResizeGrip = Base.new("Frame", {
+    UserInputService.InputEnded:Connect(function()
+        Dragging = false
+    end)
+
+    -- ✅ RESIZE LOGIC (TOUCH FRIENDLY)
+    local ResizeGrip = Base.new("TextButton", {
+        Text = "╲╱",
+        Font = Enum.Font.GothamBold,
+        TextSize = 18,
+        TextColor3 = self.Theme.ResizeGripColor,
+        BackgroundTransparency = 0.85,
+        BackgroundColor3 = Color3.new(0.2,0.2,0.2),
         Size = UDim2.new(0, self.Theme.ResizeGripSize, 0, self.Theme.ResizeGripSize),
         Position = UDim2.new(1, 0, 1, 0),
         AnchorPoint = Vector2.new(1, 1),
-        BackgroundTransparency = 1,
-        ZIndex = 15, -- Mas mataas para laging nasa ibabaw
+        ZIndex = 30,
         Parent = Window.Instance
     })
-
-    -- Ang itsura ng "putol-putol" na guhit
-    Base.new("TextLabel", {
-        Text = "╲╱", -- Ganito ang itsura ng resize grip
-        Font = Enum.Font.GothamBold,
-        TextSize = 12,
-        TextColor3 = self.Theme.ResizeGripColor,
-        TextTransparency = 0.5,
-        Size = UDim2.new(1, 0, 1, 0),
-        Position = UDim2.new(0, -2, 0, -2),
-        TextXAlignment = Enum.TextXAlignment.Right,
-        TextYAlignment = Enum.TextYAlignment.Bottom,
-        BackgroundTransparency = 1,
-        Parent = ResizeGrip.Instance
-    })
+    Instance.new("UICorner", ResizeGrip.Instance).CornerRadius = UDim.new(0, 6)
 
     local Resizing = false
-    local StartSize = nil
-    local OriginalPos = nil
+    local StartSize
 
     ResizeGrip.Instance.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 and not IsMinimized then
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
             Resizing = true
             StartSize = Vector2.new(Window.Instance.Size.X.Offset, Window.Instance.Size.Y.Offset)
-            OriginalPos = Vector2.new(Window.Instance.Position.X.Offset, Window.Instance.Position.Y.Offset)
             StartInputPos = Vector2.new(input.Position.X, input.Position.Y)
-
-            input.Changed:Connect(function(v)
-                if v.UserInputState == Enum.UserInputState.End then
-                    Resizing = false
-                    -- I-save ang bagong laki para bumalik kapag ibinalik mula sa minimize
-                    self.Theme.NormalWindowSize = Window.Instance.Size
-                    self.Theme.NormalWindowPos = Window.Instance.Position
-                end
-            end)
         end
     end)
 
     UserInputService.InputChanged:Connect(function(input)
-        if not Resizing or input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
-
-        local DeltaX = input.Position.X - StartInputPos.X
-        local DeltaY = input.Position.Y - StartInputPos.Y
-
-        local NewWidth = math.max(self.Theme.MinWindowWidth, StartSize.X + DeltaX)
-        local NewHeight = math.max(self.Theme.MinWindowHeight, StartSize.Y + DeltaY)
-
-        -- I-update ang laki at posisyon nang tama
-        Window.Instance.Size = UDim2.new(0, NewWidth, 0, NewHeight)
-        Window.Instance.Position = UDim2.new(0, OriginalPos.X, 0, OriginalPos.Y)
+        if not Resizing then return end
+        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = Vector2.new(input.Position.X, input.Position.Y) - StartInputPos
+            local newW = math.max(self.Theme.MinWindowWidth, StartSize.X + delta.X)
+            local newH = math.max(self.Theme.MinWindowHeight, StartSize.Y + delta.Y)
+            Window.Instance.Size = UDim2.new(0, newW, 0, newH)
+        end
     end)
 
-    -- Minimize/Maximize/Close
-    MinimizeBtn.Instance.Activated:Connect(function()
+    UserInputService.InputEnded:Connect(function()
+        Resizing = false
+    end)
+
+    -- Buttons Actions
+    local IsMinimized = false
+    MinBtn.Instance.Activated:Connect(function()
         if not IsMinimized then
-            TweenService:Create(Window.Instance, TweenInfo, {
+            TweenService:Create(Window.Instance, TweenInfo.new(0.25), {
                 Size = self.Theme.MinimizedBarSize,
                 Position = self.Theme.MinimizedBarPos,
                 BackgroundTransparency = self.Theme.MinimizedTransparency
             }):Play()
-            task.wait(self.Theme.TweenTime/2)
             MainContainer.Instance.Visible = false
-            ResizeGrip.Instance.Visible = false -- Itago ang resize kapag naka-minimize
-            MinimizeBtn.Instance.Visible = false
-            CloseBtn.Instance.Visible = false
-            MaximizeBtn.Instance.Position = UDim2.new(1, -32, 0, 0)
+            ResizeGrip.Instance.Visible = false
             IsMinimized = true
         end
     end)
 
-    MaximizeBtn.Instance.Activated:Connect(function()
+    MaxBtn.Instance.Activated:Connect(function()
         if IsMinimized then
-            MainContainer.Instance.Visible = true
-            ResizeGrip.Instance.Visible = true -- Ipakita ulit
-            MinimizeBtn.Instance.Visible = true
-            CloseBtn.Instance.Visible = true
-            MaximizeBtn.Instance.Position = UDim2.new(0, 32, 0, 0)
-            TweenService:Create(Window.Instance, TweenInfo, {
+            TweenService:Create(Window.Instance, TweenInfo.new(0.25), {
                 Size = self.Theme.NormalWindowSize,
                 Position = self.Theme.NormalWindowPos,
                 BackgroundTransparency = self.Theme.NormalTransparency
             }):Play()
+            MainContainer.Instance.Visible = true
+            ResizeGrip.Instance.Visible = true
             IsMinimized = false
         end
     end)
 
-    CloseBtn.Instance.Activated:Connect(function() Window.Instance:Destroy() end)
+    CloseBtn.Instance.Activated:Connect(function()
+        Window.Instance:Destroy()
+    end)
 
     return Window
 end
 
--- 🚀 START
+-- Run
 MyUILib:CreateWindow()
-
 return MyUILib
