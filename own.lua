@@ -1,8 +1,7 @@
---// VOIDWARE UI - WORKING VERSION
---// Fixed: No errors, scroll up/down works properly
+--// WINDOW + SIDEBAR + SEARCH + SCROLL + RESPONSIVE RESIZE
+--// Added: Scrollbars for Sidebar and Content Area
 
 local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
 local MyUILib = {}
 MyUILib.__index = MyUILib
 
@@ -12,7 +11,7 @@ pcall(function()
     Lucide = loadstring(game:HttpGet("https://raw.githubusercontent.com/latte-soft/lucide-roblox/refs/heads/master/lib/Icons.luau"))()
 end)
 
--- 🎨 THEME SETTINGS
+-- 🎨 SETTINGS
 MyUILib.Theme = {
     WindowBg = Color3.fromRGB(216, 128, 255),
     SidebarBg = Color3.fromRGB(90, 30, 130),
@@ -49,7 +48,7 @@ MyUILib.Theme = {
     MinimizedTransparency = 0.4
 }
 
--- 🧱 BASE CLASS
+-- 🧱 Base Class
 local Base = {}
 Base.__index = Base
 function Base.new(class, props)
@@ -63,7 +62,7 @@ function Base.new(class, props)
     return self
 end
 
--- 🪟 CREATE WINDOW
+-- 🪟 Create Window
 function MyUILib:CreateWindow()
     local Window = Base.new("Frame", {
         BackgroundColor3 = self.Theme.WindowBg,
@@ -80,14 +79,14 @@ function MyUILib:CreateWindow()
     Border.Transparency = 0.8
     Border.Thickness = 1
 
-    -- 📌 HEADER / DRAG AREA
+    -- 📌 Header / Drag Area
     local DragArea = Base.new("Frame", {
         Size = UDim2.new(1, 0, 0, self.Theme.HeaderHeight),
         BackgroundTransparency = 1,
         Parent = Window.Instance
     })
 
-    -- HEADER ICON + TEXT
+    -- 📝 Header Container (Icon + Title + Subtitle)
     local HeaderContainer = Base.new("Frame", {
         Size = UDim2.new(0, 260, 1, 0),
         Position = UDim2.new(0, 12, 0, 0),
@@ -95,6 +94,7 @@ function MyUILib:CreateWindow()
         Parent = DragArea.Instance
     })
 
+    -- 🖼️ Header Icon
     local HeaderIcon = Base.new("ImageLabel", {
         Size = UDim2.new(0, self.Theme.HeaderIconSize, 0, self.Theme.HeaderIconSize),
         Position = UDim2.new(0, 0, 0.5, -self.Theme.HeaderIconSize/2),
@@ -121,6 +121,7 @@ function MyUILib:CreateWindow()
         })
     end
 
+    -- 📄 Title + Subtitle
     local TextContainer = Base.new("Frame", {
         Size = UDim2.new(0, 220, 1, 0),
         Position = UDim2.new(0, self.Theme.HeaderIconSize + 10, 0, 4),
@@ -135,6 +136,7 @@ function MyUILib:CreateWindow()
         TextColor3 = self.Theme.TextColor,
         TextTransparency = self.Theme.HeaderTextTransparency,
         Size = UDim2.new(1, 0, 0, 16),
+        Position = UDim2.new(0, 0, 0, 0),
         BackgroundTransparency = 1,
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = TextContainer.Instance
@@ -153,7 +155,7 @@ function MyUILib:CreateWindow()
         Parent = TextContainer.Instance
     })
 
-    -- CONTROL BUTTONS
+    -- 🎛️ Control Buttons
     local Controls = Base.new("Frame", {
         Size = UDim2.new(0, 88, 0, 28),
         Position = UDim2.new(1, -96, 0, 4),
@@ -205,7 +207,7 @@ function MyUILib:CreateWindow()
     local MaximizeBtn = CreateBtn("maximize", 32)
     local CloseBtn = CreateBtn("x", 64)
 
-    -- MAIN CONTAINER
+    -- 📄 MAIN CONTAINER
     local MainContainer = Base.new("Frame", {
         Size = UDim2.new(1, 0, 1, -self.Theme.HeaderHeight),
         Position = UDim2.new(0, 0, 0, self.Theme.HeaderHeight),
@@ -214,7 +216,7 @@ function MyUILib:CreateWindow()
         Parent = Window.Instance
     })
 
-    -- 📌 SIDEBAR
+    -- 📌 LEFT SIDEBAR
     local Sidebar = Base.new("Frame", {
         Size = UDim2.new(0, self.Theme.SidebarWidth, 1, 0),
         BackgroundColor3 = self.Theme.SidebarBg,
@@ -223,7 +225,7 @@ function MyUILib:CreateWindow()
     })
     Instance.new("UICorner", Sidebar.Instance).CornerRadius = self.Theme.CornerRadius
 
-    -- SEARCH BAR
+    -- ✅ SEARCH BAR
     local SearchBox = Base.new("Frame", {
         Size = UDim2.new(1, -12, 0, 36),
         Position = UDim2.new(0, 6, 0, 6),
@@ -262,7 +264,7 @@ function MyUILib:CreateWindow()
         Parent = SearchBox.Instance
     })
 
-    -- ✅ SIDEBAR SCROLL FRAME
+    -- ✅ SCROLL FRAME FOR TABS
     local SidebarScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, 0, 1, -48),
         Position = UDim2.new(0, 0, 0, 48),
@@ -275,7 +277,7 @@ function MyUILib:CreateWindow()
     })
     SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, 0)
 
-    -- ✅ CONTENT SCROLL FRAME (Gumagana nang tama, walang error)
+    -- 📌 RIGHT CONTENT AREA WITH SCROLL
     local ContentScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, -self.Theme.SidebarWidth, 1, 0),
         Position = UDim2.new(0, self.Theme.SidebarWidth, 0, 0),
@@ -285,11 +287,12 @@ function MyUILib:CreateWindow()
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
         VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
+        CanvasSize = UDim2.new(0, 0, 0, 0),
         Parent = MainContainer.Instance
     })
     Instance.new("UICorner", ContentScroll.Instance).CornerRadius = self.Theme.CornerRadius
 
-    -- 📋 TABS LIST
+    -- 📋 TAB LIST
     local Tabs = {
         {Name = "Search", Icon = "search"},
         {Name = "Information", Icon = "info"},
@@ -298,7 +301,6 @@ function MyUILib:CreateWindow()
         {Name = "Auto", Icon = "refresh-cw"},
         {Name = "Update Focused", Icon = "crosshair"},
         {Name = "Day Farm", Icon = "sun"},
-        {Name = "Night Farm", Icon = "moon"},
         {Name = "Settings", Icon = "settings"},
         {Name = "Credits", Icon = "user-check"},
         {Name = "Debug", Icon = "bug"}
@@ -307,7 +309,7 @@ function MyUILib:CreateWindow()
     local TabButtons = {}
     local CurrentTab = nil
 
-    -- CREATE TAB BUTTONS
+    -- Create each tab button
     for i, tabData in ipairs(Tabs) do
         local TabBtn = Base.new("TextButton", {
             Size = UDim2.new(1, -12, 0, 36),
@@ -347,9 +349,7 @@ function MyUILib:CreateWindow()
             Parent = TabBtn.Instance
         })
 
-        -- TAB CLICK ACTION + LAMAN PARA MAKITA ANG SCROLL
         TabBtn.Instance.Activated:Connect(function()
-            -- Reset selected tab style
             for _, btn in ipairs(TabButtons) do
                 btn.Button.BackgroundTransparency = 1
             end
@@ -357,31 +357,21 @@ function MyUILib:CreateWindow()
             TabBtn.Instance.BackgroundColor3 = self.Theme.TabSelected
             CurrentTab = tabData.Name
 
-            -- Burahin laman at maglagay ng bago
             ContentScroll.Instance:ClearAllChildren()
-
-            -- ✅ MAGLAGAY NG MARAMING LAMAN PARA SIGURADONG MAY SCROLL
-            local Ypos = 10
-            for item = 1, 25 do -- 25 na linya, sapat na para lumabas ang scroll
-                Base.new("TextLabel", {
-                    Text = CurrentTab .. " - Item #" .. item,
-                    Font = Enum.Font.Gotham,
-                    TextSize = 14,
-                    TextColor3 = self.Theme.TextColor,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, -20, 0, 26),
-                    Position = UDim2.new(0, 10, 0, Ypos),
-                    TextXAlignment = Enum.TextXAlignment.Left,
-                    Parent = ContentScroll.Instance
-                })
-                Ypos = Ypos + 30
-            end
-
-            -- ✅ Itakda ang taas ng scroll area
-            ContentScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, Ypos + 10)
+            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 100)
+            Base.new("TextLabel", {
+                Text = "Content: "..CurrentTab,
+                Font = Enum.Font.GothamBold,
+                TextSize = 18,
+                TextColor3 = self.Theme.TextColor,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, -20, 0, 30),
+                Position = UDim2.new(0, 10, 0, 10),
+                TextXAlignment = Enum.TextXAlignment.Left,
+                Parent = ContentScroll.Instance
+            })
         end)
 
-        -- HOVER EFFECT
         TabBtn.Instance.MouseEnter:Connect(function()
             if TabBtn.Instance.BackgroundTransparency ~= 0.7 then
                 TabBtn.Instance.BackgroundTransparency = 0.85
@@ -397,10 +387,10 @@ function MyUILib:CreateWindow()
         table.insert(TabButtons, {Button = TabBtn.Instance, Name = tabData.Name})
     end
 
-    -- Update sidebar scroll height
+    -- ✅ Update sidebar scroll height
     SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, #Tabs * 42)
 
-    -- Search filter
+    -- ✅ Search filter
     SearchInput.Instance:GetPropertyChangedSignal("Text"):Connect(function()
         local searchText = SearchInput.Instance.Text:lower()
         local offset = 0
@@ -420,14 +410,13 @@ function MyUILib:CreateWindow()
         SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, visibleCount * 42)
     end)
 
-    -- Set first tab active on open
+    -- Set first tab active
     if #TabButtons > 0 then
         TabButtons[1].Button.BackgroundTransparency = 0.7
         TabButtons[1].Button.BackgroundColor3 = self.Theme.TabSelected
-        TabButtons[1].Button:Activate()
     end
 
-    -- MINIMIZE / MAXIMIZE LOGIC
+    -- 📌 Minimize / Restore
     local IsMinimized = false
     local IsMaximized = false
     local TweenInfo = TweenInfo.new(self.Theme.TweenTime, self.Theme.TweenStyle, self.Theme.TweenDirection)
@@ -468,7 +457,7 @@ function MyUILib:CreateWindow()
                 self.Theme.NormalWindowPos = Window.Instance.Position
                 TweenService:Create(Window.Instance, TweenInfo, {
                     Size = UDim2.new(0.92, 0, 0.88, 0),
-                    Position = UDim2.new(0.04, 0, 0.06, 0)
+                    Position = UDim2.new(0.04, 0, 0, 0)
                 }):Play()
                 IsMaximized = true
             else
@@ -485,7 +474,8 @@ function MyUILib:CreateWindow()
         Window.Instance:Destroy()
     end)
 
-    -- DRAG LOGIC
+    -- 🖱️ Drag Logic
+    local UIS = game:GetService("UserInputService")
     local Dragging = false
     local StartPos, StartInputPos
 
@@ -513,7 +503,7 @@ function MyUILib:CreateWindow()
         end
     end)
 
-    UserInputService.InputChanged:Connect(function(input)
+    UIS.InputChanged:Connect(function(input)
         if not Dragging then return end
         if input.UserInputType ~= Enum.UserInputType.Touch and input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
 
@@ -524,7 +514,7 @@ function MyUILib:CreateWindow()
         )
     end)
 
-    -- RESIZE LOGIC
+    -- ✅ FIXED RESIZE LOGIC
     local ResizeGrip = Base.new("Frame", {
         Size = UDim2.new(0, 30, 0, 30),
         Position = UDim2.new(1, 0, 1, 0),
@@ -553,7 +543,7 @@ function MyUILib:CreateWindow()
         end
     end)
 
-    UserInputService.InputChanged:Connect(function(input)
+    UIS.InputChanged:Connect(function(input)
         if not Resizing or IsMinimized then return end
         if input.UserInputType ~= Enum.UserInputType.Touch and input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
 
@@ -568,7 +558,7 @@ function MyUILib:CreateWindow()
     return Window
 end
 
--- 🚀 INITIALIZE
+-- 🚀 Initialize
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "VoidwareUI"
 ScreenGui.ResetOnSpawn = false
