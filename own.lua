@@ -1,5 +1,5 @@
---// VOIDWARE UI - FINAL FIXED VERSION
---// Fixed: Scroll direction error, content scroll works UP & DOWN properly
+--// VOIDWARE UI - WORKING VERSION
+--// Fixed: No errors, scroll up/down works properly
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -214,7 +214,7 @@ function MyUILib:CreateWindow()
         Parent = Window.Instance
     })
 
-    -- 📌 SIDEBAR WITH SCROLL
+    -- 📌 SIDEBAR
     local Sidebar = Base.new("Frame", {
         Size = UDim2.new(0, self.Theme.SidebarWidth, 1, 0),
         BackgroundColor3 = self.Theme.SidebarBg,
@@ -262,7 +262,7 @@ function MyUILib:CreateWindow()
         Parent = SearchBox.Instance
     })
 
-    -- SIDEBAR SCROLL FRAME
+    -- ✅ SIDEBAR SCROLL FRAME
     local SidebarScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, 0, 1, -48),
         Position = UDim2.new(0, 0, 0, 48),
@@ -271,12 +271,11 @@ function MyUILib:CreateWindow()
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
         VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
-        ScrollingDirection = Enum.ScrollingDirection.Vertical, -- ✅ Fixed correct name
         Parent = Sidebar.Instance
     })
     SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, 0)
 
-    -- ✅ FIXED CONTENT SCROLL FRAME (UP & DOWN ONLY)
+    -- ✅ CONTENT SCROLL FRAME (Gumagana nang tama, walang error)
     local ContentScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, -self.Theme.SidebarWidth, 1, 0),
         Position = UDim2.new(0, self.Theme.SidebarWidth, 0, 0),
@@ -286,9 +285,6 @@ function MyUILib:CreateWindow()
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
         VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
-        ScrollingDirection = Enum.ScrollingDirection.Vertical, -- ✅ Fixed correct name
-        AutomaticCanvasSize = Enum.AutomaticSize.Y, -- Auto adjust height
-        CanvasSize = UDim2.new(1, 0, 0, 0),
         Parent = MainContainer.Instance
     })
     Instance.new("UICorner", ContentScroll.Instance).CornerRadius = self.Theme.CornerRadius
@@ -351,8 +347,9 @@ function MyUILib:CreateWindow()
             Parent = TabBtn.Instance
         })
 
-        -- TAB CLICK ACTION
+        -- TAB CLICK ACTION + LAMAN PARA MAKITA ANG SCROLL
         TabBtn.Instance.Activated:Connect(function()
+            -- Reset selected tab style
             for _, btn in ipairs(TabButtons) do
                 btn.Button.BackgroundTransparency = 1
             end
@@ -360,30 +357,28 @@ function MyUILib:CreateWindow()
             TabBtn.Instance.BackgroundColor3 = self.Theme.TabSelected
             CurrentTab = tabData.Name
 
-            -- CLEAR OLD CONTENT
+            -- Burahin laman at maglagay ng bago
             ContentScroll.Instance:ClearAllChildren()
-            -- Reset canvas size for new content
-            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 0)
 
-            -- ✅ TEST CONTENT TO SEE SCROLL WORK
-            local ContentY = 10
-            for line = 1, 20 do -- Enough lines to make scroll appear
+            -- ✅ MAGLAGAY NG MARAMING LAMAN PARA SIGURADONG MAY SCROLL
+            local Ypos = 10
+            for item = 1, 25 do -- 25 na linya, sapat na para lumabas ang scroll
                 Base.new("TextLabel", {
-                    Text = CurrentTab .. " - Item Line " .. line,
+                    Text = CurrentTab .. " - Item #" .. item,
                     Font = Enum.Font.Gotham,
                     TextSize = 14,
                     TextColor3 = self.Theme.TextColor,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, -20, 0, 28),
-                    Position = UDim2.new(0, 10, 0, ContentY),
+                    Size = UDim2.new(1, -20, 0, 26),
+                    Position = UDim2.new(0, 10, 0, Ypos),
                     TextXAlignment = Enum.TextXAlignment.Left,
                     Parent = ContentScroll.Instance
                 })
-                ContentY = ContentY + 32
+                Ypos = Ypos + 30
             end
 
-            -- Set final canvas height
-            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, ContentY + 10)
+            -- ✅ Itakda ang taas ng scroll area
+            ContentScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, Ypos + 10)
         end)
 
         -- HOVER EFFECT
@@ -402,10 +397,10 @@ function MyUILib:CreateWindow()
         table.insert(TabButtons, {Button = TabBtn.Instance, Name = tabData.Name})
     end
 
-    -- UPDATE SIDEBAR SCROLL HEIGHT
+    -- Update sidebar scroll height
     SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, #Tabs * 42)
 
-    -- SEARCH FILTER
+    -- Search filter
     SearchInput.Instance:GetPropertyChangedSignal("Text"):Connect(function()
         local searchText = SearchInput.Instance.Text:lower()
         local offset = 0
@@ -425,7 +420,7 @@ function MyUILib:CreateWindow()
         SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, visibleCount * 42)
     end)
 
-    -- SET FIRST TAB ACTIVE
+    -- Set first tab active on open
     if #TabButtons > 0 then
         TabButtons[1].Button.BackgroundTransparency = 0.7
         TabButtons[1].Button.BackgroundColor3 = self.Theme.TabSelected
