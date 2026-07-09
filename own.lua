@@ -1,5 +1,5 @@
---// WINDOW + SIDEBAR + SEARCH + SCROLL + RESPONSIVE RESIZE
---// Added: Scrollbars for Sidebar and Content Area
+--// VOIDWARE UI - FINAL VERSION
+--// Features: Drag, Resize, Minimize, Search, Vertical Scrolls Only
 
 local TweenService = game:GetService("TweenService")
 local MyUILib = {}
@@ -264,7 +264,7 @@ function MyUILib:CreateWindow()
         Parent = SearchBox.Instance
     })
 
-    -- ✅ SCROLL FRAME FOR TABS
+    -- ✅ SCROLL FRAME FOR TABS (VERTICAL ONLY)
     local SidebarScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, 0, 1, -48),
         Position = UDim2.new(0, 0, 0, 48),
@@ -273,11 +273,16 @@ function MyUILib:CreateWindow()
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
         VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
+        -- ✅ IWAS HORIZONTAL SCROLL
+        ScrollBarImageTransparency = 0.1,
+        HorizontalScrollBarInset = Enum.ScrollBarInset.AlwaysHide,
+        HorizontalScrollBarPosition = Enum.HorizontalScrollBarPosition.Bottom,
+        CanScrollHorizontally = false,
         Parent = Sidebar.Instance
     })
-    SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, 0)
+    SidebarScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 0) -- Lapad = 100%
 
-    -- 📌 RIGHT CONTENT AREA WITH SCROLL
+    -- ✅ RIGHT CONTENT AREA (VERTICAL SCROLL LANG)
     local ContentScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, -self.Theme.SidebarWidth, 1, 0),
         Position = UDim2.new(0, self.Theme.SidebarWidth, 0, 0),
@@ -287,7 +292,11 @@ function MyUILib:CreateWindow()
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
         VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
-        CanvasSize = UDim2.new(0, 0, 0, 0),
+        -- ✅ IWAS PAG-SCROLL PAKANAN
+        HorizontalScrollBarInset = Enum.ScrollBarInset.AlwaysHide,
+        HorizontalScrollBarPosition = Enum.HorizontalScrollBarPosition.Bottom,
+        CanScrollHorizontally = false,
+        CanvasSize = UDim2.new(1, 0, 0, 100), -- Lapad = 100%
         Parent = MainContainer.Instance
     })
     Instance.new("UICorner", ContentScroll.Instance).CornerRadius = self.Theme.CornerRadius
@@ -301,6 +310,8 @@ function MyUILib:CreateWindow()
         {Name = "Auto", Icon = "refresh-cw"},
         {Name = "Update Focused", Icon = "crosshair"},
         {Name = "Day Farm", Icon = "sun"},
+        {Name = "Night Farm", Icon = "moon"},
+        {Name = "Auto Collect", Icon = "package"},
         {Name = "Settings", Icon = "settings"},
         {Name = "Credits", Icon = "user-check"},
         {Name = "Debug", Icon = "bug"}
@@ -358,16 +369,20 @@ function MyUILib:CreateWindow()
             CurrentTab = tabData.Name
 
             ContentScroll.Instance:ClearAllChildren()
-            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 100)
+            -- ✅ LAPAD NG CONTENT = 100% KAYA HINDI LUMALABAS
+            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 500) -- Taas lang ang nadadagdagan
+
             Base.new("TextLabel", {
-                Text = "Content: "..CurrentTab,
+                Text = "Content: "..CurrentTab.."\n\n\nMaglalagay ka dito ng mga buttons, toggles, inputs, atbp.\n\nAng scroll ay pataas at pababa lang.\nHindi na ito gagalaw pakanan o pakaliwa.",
                 Font = Enum.Font.GothamBold,
-                TextSize = 18,
+                TextSize = 16,
                 TextColor3 = self.Theme.TextColor,
                 BackgroundTransparency = 1,
-                Size = UDim2.new(1, -20, 0, 30),
+                Size = UDim2.new(1, -20, 0, 450),
                 Position = UDim2.new(0, 10, 0, 10),
                 TextXAlignment = Enum.TextXAlignment.Left,
+                TextYAlignment = Enum.TextYAlignment.Top,
+                TextWrapped = true,
                 Parent = ContentScroll.Instance
             })
         end)
@@ -388,7 +403,7 @@ function MyUILib:CreateWindow()
     end
 
     -- ✅ Update sidebar scroll height
-    SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, #Tabs * 42)
+    SidebarScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, #Tabs * 42)
 
     -- ✅ Search filter
     SearchInput.Instance:GetPropertyChangedSignal("Text"):Connect(function()
@@ -407,7 +422,7 @@ function MyUILib:CreateWindow()
             end
         end
 
-        SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, visibleCount * 42)
+        SidebarScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, visibleCount * 42)
     end)
 
     -- Set first tab active
@@ -457,7 +472,7 @@ function MyUILib:CreateWindow()
                 self.Theme.NormalWindowPos = Window.Instance.Position
                 TweenService:Create(Window.Instance, TweenInfo, {
                     Size = UDim2.new(0.92, 0, 0.88, 0),
-                    Position = UDim2.new(0.04, 0, 0, 0)
+                    Position = UDim2.new(0.04, 0, 0.06, 0)
                 }):Play()
                 IsMaximized = true
             else
@@ -514,7 +529,7 @@ function MyUILib:CreateWindow()
         )
     end)
 
-    -- ✅ FIXED RESIZE LOGIC
+    -- ✅ RESIZE LOGIC
     local ResizeGrip = Base.new("Frame", {
         Size = UDim2.new(0, 30, 0, 30),
         Position = UDim2.new(1, 0, 1, 0),
