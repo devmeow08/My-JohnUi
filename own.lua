@@ -1,6 +1,5 @@
---// VOIDWARE UI - FINAL VERSION
---// Features: Responsive, Scrollable Sidebar & Content, Search, Drag, Resize
---// Fixed: Content scroll is now strictly UP & DOWN like sidebar
+--// VOIDWARE UI - FINAL FIXED VERSION
+--// Fixed: Scroll direction error, content scroll works UP & DOWN properly
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
@@ -272,12 +271,12 @@ function MyUILib:CreateWindow()
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
         VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
-        ScrollDirection = Enum.ScrollDirection.Vertical, -- PATAAS-PABABA LANG
+        ScrollingDirection = Enum.ScrollingDirection.Vertical, -- ✅ Fixed correct name
         Parent = Sidebar.Instance
     })
     SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, 0)
 
-    -- ✅ FIXED CONTENT SCROLL FRAME (NGAYON AY PATAAS-PABABA LANG)
+    -- ✅ FIXED CONTENT SCROLL FRAME (UP & DOWN ONLY)
     local ContentScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, -self.Theme.SidebarWidth, 1, 0),
         Position = UDim2.new(0, self.Theme.SidebarWidth, 0, 0),
@@ -287,9 +286,9 @@ function MyUILib:CreateWindow()
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
         VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
-        ScrollDirection = Enum.ScrollDirection.Vertical, -- PATAAS-PABABA LANG
-        AutomaticCanvasSize = Enum.AutomaticSize.Y, -- Aayusin ang taas base sa laman
-        CanvasSize = UDim2.new(0, 0, 0, 0),
+        ScrollingDirection = Enum.ScrollingDirection.Vertical, -- ✅ Fixed correct name
+        AutomaticCanvasSize = Enum.AutomaticSize.Y, -- Auto adjust height
+        CanvasSize = UDim2.new(1, 0, 0, 0),
         Parent = MainContainer.Instance
     })
     Instance.new("UICorner", ContentScroll.Instance).CornerRadius = self.Theme.CornerRadius
@@ -363,10 +362,12 @@ function MyUILib:CreateWindow()
 
             -- CLEAR OLD CONTENT
             ContentScroll.Instance:ClearAllChildren()
+            -- Reset canvas size for new content
+            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 0)
 
-            -- ✅ HALIMBAWA NG LAMAN PARA MAKITA ANG SCROLL
+            -- ✅ TEST CONTENT TO SEE SCROLL WORK
             local ContentY = 10
-            for line = 1, 20 do -- Maraming linya para gumana ang scroll
+            for line = 1, 20 do -- Enough lines to make scroll appear
                 Base.new("TextLabel", {
                     Text = CurrentTab .. " - Item Line " .. line,
                     Font = Enum.Font.Gotham,
@@ -380,6 +381,9 @@ function MyUILib:CreateWindow()
                 })
                 ContentY = ContentY + 32
             end
+
+            -- Set final canvas height
+            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, ContentY + 10)
         end)
 
         -- HOVER EFFECT
