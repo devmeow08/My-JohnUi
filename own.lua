@@ -1,5 +1,5 @@
---// VOIDWARE UI - FINAL VERSION
---// Features: Drag, Resize, Minimize, Search, Vertical Scrolls Only
+--// VOIDWARE UI - FINAL SCROLL FIX
+--// Same vertical scroll for Sidebar and Content
 
 local TweenService = game:GetService("TweenService")
 local MyUILib = {}
@@ -19,7 +19,8 @@ MyUILib.Theme = {
     SearchBg = Color3.fromRGB(70, 25, 110),
     TabHover = Color3.fromRGB(130, 50, 180),
     TabSelected = Color3.fromRGB(150, 60, 210),
-    ScrollbarColor = Color3.fromRGB(180, 100, 220),
+    ScrollbarColor = Color3.fromRGB(200, 120, 240),
+    ScrollbarTransparency = 0.3,
     IconColor = Color3.new(1, 1, 1),
     IconTransparency = 0.2,
     TextColor = Color3.new(1, 1, 1),
@@ -86,7 +87,7 @@ function MyUILib:CreateWindow()
         Parent = Window.Instance
     })
 
-    -- 📝 Header Container (Icon + Title + Subtitle)
+    -- 📝 Header Container
     local HeaderContainer = Base.new("Frame", {
         Size = UDim2.new(0, 260, 1, 0),
         Position = UDim2.new(0, 12, 0, 0),
@@ -264,7 +265,7 @@ function MyUILib:CreateWindow()
         Parent = SearchBox.Instance
     })
 
-    -- ✅ SCROLL FRAME FOR TABS (VERTICAL ONLY)
+    -- ✅ SIDEBAR SCROLL (ORIGINAL WORKING SETTINGS)
     local SidebarScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, 0, 1, -48),
         Position = UDim2.new(0, 0, 0, 48),
@@ -272,17 +273,15 @@ function MyUILib:CreateWindow()
         BorderSizePixel = 0,
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
+        ScrollBarImageTransparency = self.Theme.ScrollbarTransparency,
         VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
-        -- ✅ IWAS HORIZONTAL SCROLL
-        ScrollBarImageTransparency = 0.1,
+        CanScrollHorizontally = false, -- WALANG PAKANAN
         HorizontalScrollBarInset = Enum.ScrollBarInset.AlwaysHide,
-        HorizontalScrollBarPosition = Enum.HorizontalScrollBarPosition.Bottom,
-        CanScrollHorizontally = false,
+        CanvasSize = UDim2.new(1, 0, 0, 0), -- LAPAD = 100%
         Parent = Sidebar.Instance
     })
-    SidebarScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 0) -- Lapad = 100%
 
-    -- ✅ RIGHT CONTENT AREA (VERTICAL SCROLL LANG)
+    -- ✅ CONTENT SCROLL - GAYANG-GAYA ANG SETTINGS NG SIDEBAR
     local ContentScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, -self.Theme.SidebarWidth, 1, 0),
         Position = UDim2.new(0, self.Theme.SidebarWidth, 0, 0),
@@ -291,12 +290,11 @@ function MyUILib:CreateWindow()
         BorderSizePixel = 0,
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
+        ScrollBarImageTransparency = self.Theme.ScrollbarTransparency,
         VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
-        -- ✅ IWAS PAG-SCROLL PAKANAN
+        CanScrollHorizontally = false, -- WALANG PAKANAN
         HorizontalScrollBarInset = Enum.ScrollBarInset.AlwaysHide,
-        HorizontalScrollBarPosition = Enum.HorizontalScrollBarPosition.Bottom,
-        CanScrollHorizontally = false,
-        CanvasSize = UDim2.new(1, 0, 0, 100), -- Lapad = 100%
+        CanvasSize = UDim2.new(1, 0, 0, 600), -- LAPAD = 100%, TAAS LANG ANG BABAGUHIN
         Parent = MainContainer.Instance
     })
     Instance.new("UICorner", ContentScroll.Instance).CornerRadius = self.Theme.CornerRadius
@@ -369,16 +367,16 @@ function MyUILib:CreateWindow()
             CurrentTab = tabData.Name
 
             ContentScroll.Instance:ClearAllChildren()
-            -- ✅ LAPAD NG CONTENT = 100% KAYA HINDI LUMALABAS
-            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 500) -- Taas lang ang nadadagdagan
+            -- ✅ Taas lang ang binabago, lapad laging 100%
+            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 800)
 
             Base.new("TextLabel", {
-                Text = "Content: "..CurrentTab.."\n\n\nMaglalagay ka dito ng mga buttons, toggles, inputs, atbp.\n\nAng scroll ay pataas at pababa lang.\nHindi na ito gagalaw pakanan o pakaliwa.",
+                Text = "Tab: "..CurrentTab.."\n\n\n✅ Scroll pataas at pababa lang\n✅ Walang galaw pakaliwa o pakanan\n✅ Parehas na ugali ng sidebar\n\nMaglalagay ka rito ng mga buttons, toggles, inputs, etc.",
                 Font = Enum.Font.GothamBold,
                 TextSize = 16,
                 TextColor3 = self.Theme.TextColor,
                 BackgroundTransparency = 1,
-                Size = UDim2.new(1, -20, 0, 450),
+                Size = UDim2.new(1, -20, 0, 780),
                 Position = UDim2.new(0, 10, 0, 10),
                 TextXAlignment = Enum.TextXAlignment.Left,
                 TextYAlignment = Enum.TextYAlignment.Top,
