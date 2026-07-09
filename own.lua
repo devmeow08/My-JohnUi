@@ -1,6 +1,6 @@
 --[[
     Voidware UI Library
-    Fixed: Window not showing, fully responsive
+    Fixed: Resize not working, Resize Grip visible & functional
 ]]
 
 local TweenService = game:GetService("TweenService")
@@ -26,6 +26,7 @@ MyUILib.Theme = {
     TabHover = Color3.fromRGB(130, 50, 180),
     TabSelected = Color3.fromRGB(150, 60, 210),
     ScrollbarColor = Color3.fromRGB(180, 100, 220),
+    ResizeGripColor = Color3.new(1, 1, 1),
     IconColor = Color3.new(1, 1, 1),
     TextColor = Color3.new(1, 1, 1),
     HeaderIcon = "user-round",
@@ -43,8 +44,9 @@ MyUILib.Theme = {
     MinimizedBarPos = UDim2.new(0.5, -120, 0, 12),
     HeaderHeight = 36,
     SidebarWidth = 160,
-    MinWindowWidth = 420,
-    MinWindowHeight = 280,
+    MinWindowWidth = 420,   -- Hindi pwedeng lumiit pa rito
+    MinWindowHeight = 280,  -- Hindi pwedeng lumiit pa rito
+    ResizeGripSize = 28,
 
     -- Animations
     TweenTime = 0.3,
@@ -70,14 +72,15 @@ end
 
 -- 🪟 CREATE WINDOW
 function MyUILib:CreateWindow()
-    -- ✅ Fixed ScreenGui Creation
+    -- ✅ ScreenGui Setup
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "VoidwareUI"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.DisplayOrder = 999
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
-    -- Main Window
+    -- ✅ Main Window
     local Window = Base.new("Frame", {
         BackgroundColor3 = self.Theme.WindowBg,
         BackgroundTransparency = self.Theme.NormalTransparency,
@@ -334,7 +337,6 @@ function MyUILib:CreateWindow()
             TabBtn.Instance.BackgroundColor3 = self.Theme.TabSelected
             CurrentTab = tabData.Name
 
-            -- Responsive Content Example
             ContentScroll.Instance:ClearAllChildren()
             ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 300)
 
@@ -366,7 +368,6 @@ function MyUILib:CreateWindow()
         table.insert(TabButtons, {Button = TabBtn.Instance, Name = tabData.Name})
     end
 
-    -- Update Scroll Height
     SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, #Tabs * 42)
 
     -- Search Function
@@ -387,7 +388,7 @@ function MyUILib:CreateWindow()
         TabButtons[1].Button.BackgroundColor3 = self.Theme.TabSelected
     end
 
-    -- 🖱️ DRAG & RESIZE LOGIC
+    -- 🖱️ DRAG LOGIC
     local IsMinimized = false
     local TweenInfo = TweenInfo.new(self.Theme.TweenTime, self.Theme.TweenStyle, self.Theme.TweenDirection)
     local Dragging, StartPos, StartInputPos = false, nil, nil
@@ -411,40 +412,78 @@ function MyUILib:CreateWindow()
         Window.Instance.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + delta.X, StartPos.Y.Scale, StartPos.Y.Offset + delta.Y)
     end)
 
-    -- Resize Grip
+    -- ✅ RESIZE GRIP & LOGIC (NAYOS NA ITO)
     local ResizeGrip = Base.new("Frame", {
-        Size = UDim2.new(0, 30, 0, 30),
+        Size = UDim2.new(0, self.Theme.ResizeGripSize, 0, self.Theme.ResizeGripSize),
         Position = UDim2.new(1, 0, 1, 0),
         AnchorPoint = Vector2.new(1, 1),
         BackgroundTransparency = 1,
-        ZIndex = 11,
+        ZIndex = 15, -- Mas mataas para laging nasa ibabaw
         Parent = Window.Instance
     })
 
-    local Resizing, StartSize = false, nil
+    -- Ang itsura ng "putol-putol" na guhit
+    Base.new("TextLabel", {
+        Text = "╲╱", -- Ganito ang itsura ng resize grip
+        Font = Enum.Font.GothamBold,
+        TextSize = 12,
+        TextColor3 = self.Theme.ResizeGripColor,
+        TextTransparency = 0.5,
+        Size = UDim2.new(1, 0, 1, 0),
+        Position = UDim2.new(0, -2, 0, -2),
+        TextXAlignment = Enum.TextXAlignment.Right,
+        TextYAlignment = Enum.TextYAlignment.Bottom,
+        BackgroundTransparency = 1,
+        Parent = ResizeGrip.Instance
+    })
+
+    local Resizing = false
+    local StartSize = nil
+    local OriginalPos = nil
+
     ResizeGrip.Instance.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 and not IsMinimized then
             Resizing = true
             StartSize = Vector2.new(Window.Instance.Size.X.Offset, Window.Instance.Size.Y.Offset)
+            OriginalPos = Vector2.new(Window.Instance.Position.X.Offset, Window.Instance.Position.Y.Offset)
             StartInputPos = Vector2.new(input.Position.X, input.Position.Y)
-            input.Changed:Connect(function(v) if v.UserInputState == Enum.UserInputState.End then Resizing = false end end)
+
+            input.Changed:Connect(function(v)
+                if v.UserInputState == Enum.UserInputState.End then
+                    Resizing = false
+                    -- I-save ang bagong laki para bumalik kapag ibinalik mula sa minimize
+                    self.Theme.NormalWindowSize = Window.Instance.Size
+                    self.Theme.NormalWindowPos = Window.Instance.Position
+                end
+            end)
         end
     end)
 
     UserInputService.InputChanged:Connect(function(input)
         if not Resizing or input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
-        local delta = Vector2.new(input.Position.X, input.Position.Y) - StartInputPos
-        local newW = math.max(self.Theme.MinWindowWidth, StartSize.X + delta.X)
-        local newH = math.max(self.Theme.MinWindowHeight, StartSize.Y + delta.Y)
-        Window.Instance.Size = UDim2.new(0, newW, 0, newH)
+
+        local DeltaX = input.Position.X - StartInputPos.X
+        local DeltaY = input.Position.Y - StartInputPos.Y
+
+        local NewWidth = math.max(self.Theme.MinWindowWidth, StartSize.X + DeltaX)
+        local NewHeight = math.max(self.Theme.MinWindowHeight, StartSize.Y + DeltaY)
+
+        -- I-update ang laki at posisyon nang tama
+        Window.Instance.Size = UDim2.new(0, NewWidth, 0, NewHeight)
+        Window.Instance.Position = UDim2.new(0, OriginalPos.X, 0, OriginalPos.Y)
     end)
 
     -- Minimize/Maximize/Close
     MinimizeBtn.Instance.Activated:Connect(function()
         if not IsMinimized then
-            TweenService:Create(Window.Instance, TweenInfo, {Size = self.Theme.MinimizedBarSize, Position = self.Theme.MinimizedBarPos, BackgroundTransparency = self.Theme.MinimizedTransparency}):Play()
+            TweenService:Create(Window.Instance, TweenInfo, {
+                Size = self.Theme.MinimizedBarSize,
+                Position = self.Theme.MinimizedBarPos,
+                BackgroundTransparency = self.Theme.MinimizedTransparency
+            }):Play()
             task.wait(self.Theme.TweenTime/2)
             MainContainer.Instance.Visible = false
+            ResizeGrip.Instance.Visible = false -- Itago ang resize kapag naka-minimize
             MinimizeBtn.Instance.Visible = false
             CloseBtn.Instance.Visible = false
             MaximizeBtn.Instance.Position = UDim2.new(1, -32, 0, 0)
@@ -455,10 +494,15 @@ function MyUILib:CreateWindow()
     MaximizeBtn.Instance.Activated:Connect(function()
         if IsMinimized then
             MainContainer.Instance.Visible = true
+            ResizeGrip.Instance.Visible = true -- Ipakita ulit
             MinimizeBtn.Instance.Visible = true
             CloseBtn.Instance.Visible = true
             MaximizeBtn.Instance.Position = UDim2.new(0, 32, 0, 0)
-            TweenService:Create(Window.Instance, TweenInfo, {Size = self.Theme.NormalWindowSize, Position = self.Theme.NormalWindowPos, BackgroundTransparency = self.Theme.NormalTransparency}):Play()
+            TweenService:Create(Window.Instance, TweenInfo, {
+                Size = self.Theme.NormalWindowSize,
+                Position = self.Theme.NormalWindowPos,
+                BackgroundTransparency = self.Theme.NormalTransparency
+            }):Play()
             IsMinimized = false
         end
     end)
