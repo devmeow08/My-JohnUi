@@ -1,6 +1,6 @@
 --// VOIDWARE UI - FULL VERSION
---// Features: Search, Scroll, Responsive Resize, Auto User Profile
---// Ready to upload to GitHub
+--// Optimized for Android / Touch Screen
+--// Features: Search, Scroll, Drag, Resize, Permanent Tab Highlight
 
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
@@ -20,8 +20,7 @@ MyUILib.Theme = {
     SidebarBg = Color3.fromRGB(90, 30, 130),
     ContentBg = Color3.fromRGB(110, 40, 150),
     SearchBg = Color3.fromRGB(70, 25, 110),
-    TabHover = Color3.fromRGB(130, 50, 180),
-    TabSelected = Color3.fromRGB(150, 60, 210),
+    TabSelected = Color3.fromRGB(150, 60, 210), -- Kulay ng napiling tab
     UserProfileBg = Color3.fromRGB(80, 28, 120),
     ScrollbarColor = Color3.fromRGB(180, 100, 220),
     IconColor = Color3.new(1, 1, 1),
@@ -46,7 +45,7 @@ MyUILib.Theme = {
     UserProfileHeight = 60,
     MinWindowWidth = 420,
     MinWindowHeight = 280,
-    TweenTime = 0.3,
+    TweenTime = 0.22, -- Bilis ng animation
     TweenStyle = Enum.EasingStyle.Quad,
     TweenDirection = Enum.EasingDirection.Out,
     NormalTransparency = 0,
@@ -282,7 +281,7 @@ function MyUILib:CreateWindow()
     })
     SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, 0)
 
-    -- ✅ AUTO USER PROFILE SECTION (LIKE ORION UI)
+    -- ✅ AUTO USER PROFILE SECTION
     local UserProfile = Base.new("Frame", {
         Size = UDim2.new(1, 0, 0, self.Theme.UserProfileHeight),
         Position = UDim2.new(0, 0, 1, -self.Theme.UserProfileHeight),
@@ -309,7 +308,7 @@ function MyUILib:CreateWindow()
     if success then
         UserAvatar.Instance.Image = avatarUrl
     else
-        UserAvatar.Instance.Image = "rbxassetid://6034220868" -- Default fallback
+        UserAvatar.Instance.Image = "rbxassetid://6034220868"
     end
 
     -- Username & Display Name
@@ -346,7 +345,7 @@ function MyUILib:CreateWindow()
         Parent = UserInfoContainer.Instance
     })
 
-    -- 📌 RIGHT CONTENT AREA WITH SCROLL
+    -- 📌 RIGHT CONTENT AREA
     local ContentScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, -self.Theme.SidebarWidth, 1, 0),
         Position = UDim2.new(0, self.Theme.SidebarWidth, 0, 0),
@@ -377,6 +376,7 @@ function MyUILib:CreateWindow()
 
     local TabButtons = {}
     local CurrentTab = nil
+    local TweenInfo = TweenInfo.new(self.Theme.TweenTime, self.Theme.TweenStyle, self.Theme.TweenDirection)
 
     -- Create each tab button
     for i, tabData in ipairs(Tabs) do
@@ -418,14 +418,23 @@ function MyUILib:CreateWindow()
             Parent = TabBtn.Instance
         })
 
+        -- ✅ PININDOT ANG TAB - MAY PERMANENTENG SHADE
         TabBtn.Instance.Activated:Connect(function()
+            -- Ibalik lahat sa normal
             for _, btn in ipairs(TabButtons) do
-                btn.Button.BackgroundTransparency = 1
+                TweenService:Create(btn.Button, TweenInfo, {
+                    BackgroundTransparency = 1,
+                    BackgroundColor3 = self.Theme.SidebarBg
+                }):Play()
             end
-            TabBtn.Instance.BackgroundTransparency = 0.7
-            TabBtn.Instance.BackgroundColor3 = self.Theme.TabSelected
-            CurrentTab = tabData.Name
 
+            -- Ilagay ang shade sa napiling tab (hindi mawawala)
+            TweenService:Create(TabBtn.Instance, TweenInfo, {
+                BackgroundTransparency = 0.6, -- Mas mababa = mas madilim
+                BackgroundColor3 = self.Theme.TabSelected
+            }):Play()
+
+            CurrentTab = tabData.Name
             ContentScroll.Instance:ClearAllChildren()
             ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 100)
             Base.new("TextLabel", {
@@ -439,18 +448,6 @@ function MyUILib:CreateWindow()
                 TextXAlignment = Enum.TextXAlignment.Left,
                 Parent = ContentScroll.Instance
             })
-        end)
-
-        TabBtn.Instance.MouseEnter:Connect(function()
-            if TabBtn.Instance.BackgroundTransparency ~= 0.7 then
-                TabBtn.Instance.BackgroundTransparency = 0.85
-                TabBtn.Instance.BackgroundColor3 = self.Theme.TabHover
-            end
-        end)
-        TabBtn.Instance.MouseLeave:Connect(function()
-            if TabBtn.Instance.BackgroundTransparency ~= 0.7 then
-                TabBtn.Instance.BackgroundTransparency = 1
-            end
         end)
 
         table.insert(TabButtons, {Button = TabBtn.Instance, Name = tabData.Name})
@@ -479,16 +476,15 @@ function MyUILib:CreateWindow()
         SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, visibleCount * 42)
     end)
 
-    -- Set first tab active
+    -- ✅ Unang tab ang naka-highlight sa simula
     if #TabButtons > 0 then
-        TabButtons[1].Button.BackgroundTransparency = 0.7
+        TabButtons[1].Button.BackgroundTransparency = 0.6
         TabButtons[1].Button.BackgroundColor3 = self.Theme.TabSelected
     end
 
     -- 📌 MINIMIZE / RESTORE
     local IsMinimized = false
     local IsMaximized = false
-    local TweenInfo = TweenInfo.new(self.Theme.TweenTime, self.Theme.TweenStyle, self.Theme.TweenDirection)
 
     MinimizeBtn.Instance.Activated:Connect(function()
         if not IsMinimized then
@@ -543,7 +539,7 @@ function MyUILib:CreateWindow()
         Window.Instance:Destroy()
     end)
 
-    -- 🖱️ DRAG LOGIC
+    -- 🖱️ DRAG LOGIC (Gumagana sa touch screen)
     local UIS = game:GetService("UserInputService")
     local Dragging = false
     local StartPos, StartInputPos
