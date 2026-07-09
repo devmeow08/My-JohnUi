@@ -39,7 +39,7 @@ BA5IC.Theme = {
     MinH = 280
 }
 
--- Helper function
+-- Helper Function
 local function Create(class, props)
     local obj = Instance.new(class)
     for k, v in pairs(props or {}) do
@@ -61,7 +61,7 @@ function BA5IC:Notify(title, text, duration)
     end)
 end
 
--- Main Window
+-- Create Main Window
 function BA5IC:MakeWindow(config)
     config = config or {}
     config.Name = config.Name or "BA5IC UI"
@@ -84,9 +84,9 @@ function BA5IC:MakeWindow(config)
     Create("UICorner", {CornerRadius = self.Theme.Corner, Parent = MainWindow})
     Create("UIStroke", {Color = Color3.new(0,0,0), Transparency = 0.8, Thickness = 1, Parent = MainWindow})
 
-    -- Header / Title Area
+    -- Header / Title Bar
     local Header = Create("Frame", {
-        Size = UDim2.new(1,0,0, self.Theme.HeaderHeight),
+        Size = UDim2.new(1, 0, 0, self.Theme.HeaderHeight),
         BackgroundTransparency = 1,
         Parent = MainWindow
     })
@@ -98,24 +98,24 @@ function BA5IC:MakeWindow(config)
         TextSize = 16,
         TextColor3 = self.Theme.Text,
         BackgroundTransparency = 1,
-        Size = UDim2.new(0, 250, 1, 0),
+        Size = UDim2.new(0, 300, 1, 0),
         Position = UDim2.new(0, 12, 0, 0),
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = Header
     })
 
-    -- Control Buttons (Minimize, Close)
+    -- Control Buttons (Minimize, Maximize, Close)
     local Controls = Create("Frame", {
-        Size = UDim2.new(0, 60, 0, 28),
-        Position = UDim2.new(1, -68, 0, 4),
+        Size = UDim2.new(0, 90, 0, 28),
+        Position = UDim2.new(1, -96, 0, 4),
         BackgroundTransparency = 1,
         Parent = Header
     })
 
-    local function MakeBtn(icon, x)
+    local function MakeControlBtn(icon, offsetX)
         local btn = Create("TextButton", {
-            Size = UDim2.new(0,28,0,28),
-            Position = UDim2.new(0,x,0,0),
+            Size = UDim2.new(0, 28, 0, 28),
+            Position = UDim2.new(0, offsetX, 0, 0),
             BackgroundTransparency = 1,
             AutoButtonColor = false,
             Parent = Controls
@@ -123,22 +123,23 @@ function BA5IC:MakeWindow(config)
         Create("TextLabel", {
             Text = icon,
             Font = Enum.Font.GothamBold,
-            TextSize = 18,
+            TextSize = 17,
             TextColor3 = self.Theme.Text,
             BackgroundTransparency = 1,
-            Size = UDim2.new(1,0,1,0),
+            Size = UDim2.new(1, 0, 1, 0),
             Parent = btn
         })
         return btn
     end
 
-    local MinBtn = MakeBtn("—", 0)
-    local CloseBtn = MakeBtn("✕", 32)
+    local MinBtn = MakeControlBtn("—", 0)
+    local MaxBtn = MakeControlBtn("⛶", 30)
+    local CloseBtn = MakeControlBtn("✕", 60)
 
-    -- Main Content Container
+    -- Main Content Area
     local MainContent = Create("Frame", {
-        Size = UDim2.new(1,0,1, -self.Theme.HeaderHeight),
-        Position = UDim2.new(0,0,0, self.Theme.HeaderHeight),
+        Size = UDim2.new(1, 0, 1, -self.Theme.HeaderHeight),
+        Position = UDim2.new(0, 0, 0, self.Theme.HeaderHeight),
         BackgroundTransparency = 1,
         Parent = MainWindow
     })
@@ -153,14 +154,14 @@ function BA5IC:MakeWindow(config)
     Create("UICorner", {CornerRadius = self.Theme.Corner, Parent = Sidebar})
 
     -- Search Bar
-    local SearchBox = Create("Frame", {
+    local SearchBar = Create("Frame", {
         Size = UDim2.new(1, -12, 0, 36),
-        Position = UDim2.new(0,6,0,6),
+        Position = UDim2.new(0, 6, 0, 6),
         BackgroundColor3 = self.Theme.SearchBg,
         BackgroundTransparency = 0.15,
         Parent = Sidebar
     })
-    Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = SearchBox})
+    Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = SearchBar})
 
     Create("TextLabel", {
         Text = "🔍",
@@ -168,30 +169,30 @@ function BA5IC:MakeWindow(config)
         TextSize = 16,
         TextColor3 = self.Theme.TextMuted,
         BackgroundTransparency = 1,
-        Size = UDim2.new(0,20,1,0),
-        Position = UDim2.new(0,8,0,0),
+        Size = UDim2.new(0, 20, 1, 0),
+        Position = UDim2.new(0, 8, 0, 0),
         TextXAlignment = Enum.TextXAlignment.Center,
-        Parent = SearchBox
+        Parent = SearchBar
     })
 
     local SearchInput = Create("TextBox", {
         Size = UDim2.new(1, -32, 1, 0),
-        Position = UDim2.new(0,32,0,0),
+        Position = UDim2.new(0, 32, 0, 0),
         BackgroundTransparency = 1,
         Text = "",
         PlaceholderText = "Search tabs...",
-        PlaceholderColor3 = Color3.new(0.8,0.8,0.8),
+        PlaceholderColor3 = Color3.new(0.8, 0.8, 0.8),
         Font = Enum.Font.Gotham,
         TextSize = 14,
         TextColor3 = self.Theme.Text,
         ClearTextOnFocus = false,
-        Parent = SearchBox
+        Parent = SearchBar
     })
 
-    -- Sidebar Scroll Frame
+    -- Sidebar Scroll
     local SidebarScroll = Create("ScrollingFrame", {
-        Size = UDim2.new(1,0,1, -48 - self.Theme.UserHeight),
-        Position = UDim2.new(0,0,0,48),
+        Size = UDim2.new(1, 0, 1, -48 - self.Theme.UserHeight),
+        Position = UDim2.new(0, 0, 0, 48),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         ScrollBarThickness = 6,
@@ -200,17 +201,17 @@ function BA5IC:MakeWindow(config)
     })
     local SidebarLayout = Create("UIListLayout", {
         SortOrder = Enum.SortOrder.LayoutOrder,
-        Padding = UDim.new(0,6),
+        Padding = UDim.new(0, 6),
         Parent = SidebarScroll
     })
     SidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, SidebarLayout.AbsoluteContentSize.Y + 10)
     end)
 
-    -- User Profile Section
+    -- User Profile
     local UserFrame = Create("Frame", {
-        Size = UDim2.new(1,0,0, self.Theme.UserHeight),
-        Position = UDim2.new(0,0,1, -self.Theme.UserHeight),
+        Size = UDim2.new(1, 0, 0, self.Theme.UserHeight),
+        Position = UDim2.new(0, 0, 1, -self.Theme.UserHeight),
         BackgroundColor3 = self.Theme.UserBg,
         BackgroundTransparency = 0.1,
         Parent = Sidebar
@@ -218,43 +219,41 @@ function BA5IC:MakeWindow(config)
     Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = UserFrame})
 
     local Avatar = Create("ImageLabel", {
-        Size = UDim2.new(0,40,0,40),
-        Position = UDim2.new(0,8,0.5,-20),
-        BackgroundColor3 = Color3.new(0,0,0),
+        Size = UDim2.new(0, 40, 0, 40),
+        Position = UDim2.new(0, 8, 0.5, -20),
+        BackgroundColor3 = Color3.new(0, 0, 0),
         Parent = UserFrame
     })
-    Create("UICorner", {CornerRadius = UDim.new(0,8), Parent = Avatar})
+    Create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = Avatar})
 
     pcall(function()
         Avatar.Image = Players:GetUserThumbnailAsync(LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
     end)
 
     Create("TextLabel", {
-        Name = "DisplayName",
         Text = LocalPlayer.DisplayName,
         Font = Enum.Font.GothamBold,
         TextSize = 15,
         TextColor3 = self.Theme.Text,
         BackgroundTransparency = 1,
         Size = UDim2.new(1, -56, 0, 20),
-        Position = UDim2.new(0,52,0,8),
+        Position = UDim2.new(0, 52, 0, 8),
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = UserFrame
     })
     Create("TextLabel", {
-        Name = "Username",
-        Text = "@"..LocalPlayer.Name,
+        Text = "@" .. LocalPlayer.Name,
         Font = Enum.Font.Gotham,
         TextSize = 12,
         TextColor3 = self.Theme.TextMuted,
         BackgroundTransparency = 1,
         Size = UDim2.new(1, -56, 0, 16),
-        Position = UDim2.new(0,52,0,28),
+        Position = UDim2.new(0, 52, 0, 28),
         TextXAlignment = Enum.TextXAlignment.Left,
         Parent = UserFrame
     })
 
-    -- Content Area
+    -- Main Content Area
     local ContentArea = Create("ScrollingFrame", {
         Size = UDim2.new(1, -self.Theme.SidebarWidth, 1, 0),
         Position = UDim2.new(0, self.Theme.SidebarWidth, 0, 0),
@@ -263,7 +262,7 @@ function BA5IC:MakeWindow(config)
         BorderSizePixel = 0,
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.Scroll,
-        CanvasSize = UDim2.new(1,0,0,0),
+        CanvasSize = UDim2.new(1, 0, 0, 0),
         Parent = MainContent
     })
     Create("UICorner", {CornerRadius = self.Theme.Corner, Parent = ContentArea})
@@ -283,17 +282,16 @@ function BA5IC:MakeWindow(config)
         ContentArea.CanvasSize = UDim2.new(1, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
     end)
 
-    -- Drag Logic
+    -- Drag Functionality
     local Dragging, StartPos, StartMouse = false
     Header.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            local pos = input.Position
-            local overControls = 
-                pos.X >= Controls.AbsolutePosition.X and 
-                pos.X <= Controls.AbsolutePosition.X + Controls.AbsoluteSize.X and
-                pos.Y >= Controls.AbsolutePosition.Y and 
-                pos.Y <= Controls.AbsolutePosition.Y + Controls.AbsoluteSize.Y
-            if not overControls then
+            local overButtons = 
+                input.Position.X >= Controls.AbsolutePosition.X and
+                input.Position.X <= Controls.AbsolutePosition.X + Controls.AbsoluteSize.X and
+                input.Position.Y >= Controls.AbsolutePosition.Y and
+                input.Position.Y <= Controls.AbsolutePosition.Y + Controls.AbsoluteSize.Y
+            if not overButtons then
                 Dragging = true
                 StartPos = MainWindow.Position
                 StartMouse = Vector2.new(input.Position.X, input.Position.Y)
@@ -308,7 +306,7 @@ function BA5IC:MakeWindow(config)
     end)
     UserInputService.InputEnded:Connect(function() Dragging = false end)
 
-    -- Minimize / Close
+    -- Window Controls
     local IsMinimized = false
     MinBtn.MouseButton1Click:Connect(function()
         if not IsMinimized then
@@ -327,10 +325,14 @@ function BA5IC:MakeWindow(config)
             IsMinimized = false
         end
     end)
-    CloseBtn.MouseButton1Click:Connect(function() MainWindow:Destroy() end)
+
+    CloseBtn.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
 
     -- Tab Management
     local Tabs = {}
+    local ActiveTab = nil
     local WindowAPI = {}
 
     function WindowAPI:MakeTab(tabConfig)
@@ -338,13 +340,13 @@ function BA5IC:MakeWindow(config)
         tabConfig.Name = tabConfig.Name or "New Tab"
         tabConfig.Icon = tabConfig.Icon or "•"
 
-        local TabBtn = Create("TextButton", {
+        local TabButton = Create("TextButton", {
             Size = UDim2.new(1, -12, 0, 36),
             BackgroundTransparency = 1,
             AutoButtonColor = false,
             Parent = SidebarScroll
         })
-        Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = TabBtn})
+        Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = TabButton})
 
         Create("TextLabel", {
             Text = tabConfig.Icon,
@@ -352,11 +354,12 @@ function BA5IC:MakeWindow(config)
             TextSize = 16,
             TextColor3 = self.Theme.Text,
             BackgroundTransparency = 1,
-            Size = UDim2.new(0,22,1,0),
-            Position = UDim2.new(0,8,0,0),
+            Size = UDim2.new(0, 22, 1, 0),
+            Position = UDim2.new(0, 8, 0, 0),
             TextXAlignment = Enum.TextXAlignment.Center,
-            Parent = TabBtn
+            Parent = TabButton
         })
+
         Create("TextLabel", {
             Text = tabConfig.Name,
             Font = Enum.Font.GothamSemibold,
@@ -364,34 +367,36 @@ function BA5IC:MakeWindow(config)
             TextColor3 = self.Theme.Text,
             BackgroundTransparency = 1,
             Size = UDim2.new(1, -40, 1, 0),
-            Position = UDim2.new(0,36,0,0),
+            Position = UDim2.new(0, 36, 0, 0),
             TextXAlignment = Enum.TextXAlignment.Left,
-            Parent = TabBtn
+            Parent = TabButton
         })
 
-        TabBtn.MouseButton1Click:Connect(function()
+        TabButton.MouseButton1Click:Connect(function()
             ContentArea:ClearAllChildren()
             ContentLayout.Parent = ContentArea
-            for _,t in ipairs(Tabs) do
-                t.Button.BackgroundTransparency = 1
+            for _, tab in ipairs(Tabs) do
+                tab.Button.BackgroundTransparency = 1
             end
-            TabBtn.BackgroundTransparency = 0.7
-            TabBtn.BackgroundColor3 = self.Theme.Selected
+            TabButton.BackgroundTransparency = 0.7
+            TabButton.BackgroundColor3 = self.Theme.Selected
+            ActiveTab = tabConfig.Name
         end)
 
-        TabBtn.MouseEnter:Connect(function()
-            if TabBtn.BackgroundTransparency ~= 0.7 then
-                TabBtn.BackgroundTransparency = 0.85
-                TabBtn.BackgroundColor3 = self.Theme.Hover
-            end
-        end)
-        TabBtn.MouseLeave:Connect(function()
-            if TabBtn.BackgroundTransparency ~= 0.7 then
-                TabBtn.BackgroundTransparency = 1
+        TabButton.MouseEnter:Connect(function()
+            if TabButton.BackgroundTransparency ~= 0.7 then
+                TabButton.BackgroundTransparency = 0.85
+                TabButton.BackgroundColor3 = self.Theme.Hover
             end
         end)
 
-        table.insert(Tabs, {Name = tabConfig.Name, Button = TabBtn})
+        TabButton.MouseLeave:Connect(function()
+            if TabButton.BackgroundTransparency ~= 0.7 then
+                TabButton.BackgroundTransparency = 1
+            end
+        end)
+
+        table.insert(Tabs, {Name = tabConfig.Name, Button = TabButton})
 
         -- Tab Elements
         local TabAPI = {}
@@ -404,6 +409,7 @@ function BA5IC:MakeWindow(config)
                 Parent = ContentArea
             })
             Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = Section})
+
             Create("TextLabel", {
                 Text = name or "Section",
                 Font = Enum.Font.GothamBold,
@@ -423,19 +429,20 @@ function BA5IC:MakeWindow(config)
             btnConfig.Name = btnConfig.Name or "Button"
             btnConfig.Callback = btnConfig.Callback or function() end
 
-            local Btn = Create("Frame", {
+            local BtnFrame = Create("Frame", {
                 Size = UDim2.new(1, 0, 0, 38),
                 BackgroundColor3 = self.Theme.SidebarBg,
                 BackgroundTransparency = 0.1,
                 Parent = ContentArea
             })
-            Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = Btn})
+            Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = BtnFrame})
 
-            local Click = Create("TextButton", {
+            local Clicker = Create("TextButton", {
                 Size = UDim2.new(1, 0, 1, 0),
                 BackgroundTransparency = 1,
-                Parent = Btn
+                Parent = BtnFrame
             })
+
             Create("TextLabel", {
                 Text = btnConfig.Name,
                 Font = Enum.Font.GothamSemibold,
@@ -445,11 +452,11 @@ function BA5IC:MakeWindow(config)
                 Size = UDim2.new(1, -16, 1, 0),
                 Position = UDim2.new(0, 8, 0, 0),
                 TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = Click
+                Parent = Clicker
             })
 
-            Click.MouseButton1Click:Connect(btnConfig.Callback)
-            return Btn
+            Clicker.MouseButton1Click:Connect(btnConfig.Callback)
+            return BtnFrame
         end
 
         function TabAPI:AddToggle(togConfig)
@@ -479,31 +486,31 @@ function BA5IC:MakeWindow(config)
                 Parent = TogFrame
             })
 
-            local ToggleSwitch = Create("Frame", {
+            local Switch = Create("Frame", {
                 Size = UDim2.new(0, 36, 0, 20),
                 Position = UDim2.new(1, -44, 0.5, -10),
                 BackgroundColor3 = State and self.Theme.ToggleOn or self.Theme.ToggleOff,
                 Parent = TogFrame
             })
-            Create("UICorner", {CornerRadius = UDim.new(0, 10), Parent = ToggleSwitch})
+            Create("UICorner", {CornerRadius = UDim.new(0, 10), Parent = Switch})
 
-            local ToggleKnob = Create("Frame", {
+            local Knob = Create("Frame", {
                 Size = UDim2.new(0, 16, 0, 16),
                 Position = State and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
-                BackgroundColor3 = Color3.new(1,1,1),
-                Parent = ToggleSwitch
+                BackgroundColor3 = Color3.new(1, 1, 1),
+                Parent = Switch
             })
-            Create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = ToggleKnob})
+            Create("UICorner", {CornerRadius = UDim.new(0, 8), Parent = Knob})
 
             local ClickArea = Create("TextButton", {
-                Size = UDim2.new(1,0,1,0),
+                Size = UDim2.new(1, 0, 1, 0),
                 BackgroundTransparency = 1,
                 Parent = TogFrame
             })
 
-            local function UpdateToggle()
-                ToggleSwitch.BackgroundColor3 = State and self.Theme.ToggleOn or self.Theme.ToggleOff
-                TweenService:Create(ToggleKnob, TweenInfo.new(0.2), {
+            local function Update()
+                Switch.BackgroundColor3 = State and self.Theme.ToggleOn or self.Theme.ToggleOff
+                TweenService:Create(Knob, TweenInfo.new(0.2), {
                     Position = State and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)
                 }):Play()
                 togConfig.Callback(State)
@@ -511,10 +518,11 @@ function BA5IC:MakeWindow(config)
 
             ClickArea.MouseButton1Click:Connect(function()
                 State = not State
-                UpdateToggle()
+                Update()
             end)
 
-            return {Get = function() return State end, Set = function(v) State = v; UpdateToggle() end}
+            Update()
+            return {Get = function() return State end, Set = function(v) State = v; Update() end}
         end
 
         function TabAPI:AddSlider(sldConfig)
@@ -546,7 +554,7 @@ function BA5IC:MakeWindow(config)
                 Parent = SliderFrame
             })
 
-            local ValueLabel = Create("TextLabel", {
+            local ValueText = Create("TextLabel", {
                 Text = tostring(Value),
                 Font = Enum.Font.GothamBold,
                 TextSize = 14,
@@ -558,53 +566,57 @@ function BA5IC:MakeWindow(config)
                 Parent = SliderFrame
             })
 
-            local SliderBar = Create("Frame", {
+            local Bar = Create("Frame", {
                 Size = UDim2.new(1, -16, 0, 8),
                 Position = UDim2.new(0, 8, 0, 32),
                 BackgroundColor3 = self.Theme.SliderBar,
                 Parent = SliderFrame
             })
-            Create("UICorner", {CornerRadius = UDim.new(0,4), Parent = SliderBar})
+            Create("UICorner", {CornerRadius = UDim.new(0, 4), Parent = Bar})
 
-            local SliderFill = Create("Frame", {
+            local Fill = Create("Frame", {
                 Size = UDim2.new((Value - sldConfig.Min) / (sldConfig.Max - sldConfig.Min), 0, 1, 0),
                 BackgroundColor3 = self.Theme.SliderFill,
-                Parent = SliderBar
+                Parent = Bar
             })
-            Create("UICorner", {CornerRadius = UDim.new(0,4), Parent = SliderFill})
+            Create("UICorner", {CornerRadius = UDim.new(0, 4), Parent = Fill})
 
             local SliderKnob = Create("Frame", {
                 Size = UDim2.new(0, 14, 0, 14),
                 Position = UDim2.new((Value - sldConfig.Min) / (sldConfig.Max - sldConfig.Min), -7, 0.5, -7),
-                BackgroundColor3 = Color3.new(1,1,1),
+                BackgroundColor3 = Color3.new(1, 1, 1),
                 ZIndex = 2,
-                Parent = SliderBar
+                Parent = Bar
             })
-            Create("UICorner", {CornerRadius = UDim.new(0,7), Parent = SliderKnob})
+            Create("UICorner", {CornerRadius = UDim.new(0, 7), Parent = SliderKnob})
 
             local Dragging = false
-            SliderBar.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then Dragging = true end
+            Bar.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    Dragging = true
+                end
             end)
             UserInputService.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then Dragging = false end
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    Dragging = false
+                end
             end)
             UserInputService.InputChanged:Connect(function(input)
                 if not Dragging or input.UserInputType ~= Enum.UserInputType.MouseMovement then return end
-                local relX = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
-                Value = math.floor(sldConfig.Min + relX * (sldConfig.Max - sldConfig.Min))
-                SliderFill.Size = UDim2.new(relX, 0, 1, 0)
-                SliderKnob.Position = UDim2.new(relX, -7, 0.5, -7)
-                ValueLabel.Text = tostring(Value)
+                local rel = math.clamp((input.Position.X - Bar.AbsolutePosition.X) / Bar.AbsoluteSize.X, 0, 1)
+                Value = math.floor(sldConfig.Min + rel * (sldConfig.Max - sldConfig.Min))
+                Fill.Size = UDim2.new(rel, 0, 1, 0)
+                SliderKnob.Position = UDim2.new(rel, -7, 0.5, -7)
+                ValueText.Text = tostring(Value)
                 sldConfig.Callback(Value)
             end)
 
             return {Get = function() return Value end, Set = function(v)
                 Value = math.clamp(v, sldConfig.Min, sldConfig.Max)
-                local rel = (Value - sldConfig.Min)/(sldConfig.Max - sldConfig.Min)
-                SliderFill.Size = UDim2.new(rel,0,1,0)
+                local rel = (Value - sldConfig.Min) / (sldConfig.Max - sldConfig.Min)
+                Fill.Size = UDim2.new(rel, 0, 1, 0)
                 SliderKnob.Position = UDim2.new(rel, -7, 0.5, -7)
-                ValueLabel.Text = tostring(Value)
+                ValueText.Text = tostring(Value)
             end}
         end
 
@@ -625,7 +637,7 @@ function BA5IC:MakeWindow(config)
             })
             Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = DropFrame})
 
-            local NameLabel = Create("TextLabel", {
+            local Label = Create("TextLabel", {
                 Text = dropConfig.Name .. ": " .. Selected,
                 Font = Enum.Font.GothamSemibold,
                 TextSize = 14,
@@ -643,7 +655,7 @@ function BA5IC:MakeWindow(config)
                 TextSize = 12,
                 TextColor3 = self.Theme.Text,
                 BackgroundTransparency = 1,
-                Size = UDim2.new(0,20,1,0),
+                Size = UDim2.new(0, 20, 1, 0),
                 Position = UDim2.new(1, -24, 0, 0),
                 TextXAlignment = Enum.TextXAlignment.Center,
                 Parent = DropFrame
@@ -659,11 +671,13 @@ function BA5IC:MakeWindow(config)
                 Parent = DropFrame
             })
             Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = OptionsFrame})
-            local OptionsLayout = Create("UIListLayout", {Padding = UDim.new(0,2), Parent = OptionsFrame})
+            local OptLayout = Create("UIListLayout", {Padding = UDim.new(0, 2), Parent = OptionsFrame})
 
             local function BuildOptions()
-                for _,c in ipairs(OptionsFrame:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
-                for _,opt in ipairs(dropConfig.Options) do
+                for _, c in ipairs(OptionsFrame:GetChildren()) do
+                    if c:IsA("TextButton") then c:Destroy() end
+                end
+                for _, opt in ipairs(dropConfig.Options) do
                     local OptBtn = Create("TextButton", {
                         Size = UDim2.new(1, -8, 0, 32),
                         BackgroundColor3 = self.Theme.SidebarBg,
@@ -678,25 +692,25 @@ function BA5IC:MakeWindow(config)
                     Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = OptBtn})
                     OptBtn.MouseButton1Click:Connect(function()
                         Selected = opt
-                        NameLabel.Text = dropConfig.Name .. ": " .. Selected
+                        Label.Text = dropConfig.Name .. ": " .. Selected
                         Open = false
                         OptionsFrame.Visible = false
                         Arrow.Text = "▼"
                         dropConfig.Callback(Selected)
                     end)
                 end
-                OptionsFrame.Size = UDim2.new(1,0,0, OptionsLayout.AbsoluteContentSize.Y + 8)
+                OptionsFrame.Size = UDim2.new(1, 0, 0, OptLayout.AbsoluteContentSize.Y + 8)
             end
 
             BuildOptions()
 
-            local ClickArea = Create("TextButton", {
-                Size = UDim2.new(1,0,1,0),
+            local Clicker = Create("TextButton", {
+                Size = UDim2.new(1, 0, 1, 0),
                 BackgroundTransparency = 1,
                 Parent = DropFrame
             })
 
-            ClickArea.MouseButton1Click:Connect(function()
+            Clicker.MouseButton1Click:Connect(function()
                 Open = not Open
                 if Open then
                     BuildOptions()
@@ -708,7 +722,7 @@ function BA5IC:MakeWindow(config)
                 end
             end)
 
-            return {Get = function() return Selected end, Set = function(val) Selected = val; NameLabel.Text = dropConfig.Name .. ": " .. val; dropConfig.Callback(val) end}
+            return {Get = function() return Selected end, Set = function(v) Selected = v; Label.Text = dropConfig.Name .. ": " .. v; dropConfig.Callback(v) end}
         end
 
         function TabAPI:AddTextBox(txtConfig)
@@ -745,20 +759,20 @@ function BA5IC:MakeWindow(config)
                 BackgroundTransparency = 0.15,
                 Text = txtConfig.Default,
                 PlaceholderText = txtConfig.Placeholder,
-                PlaceholderColor3 = Color3.new(0.7,0.7,0.7),
+                PlaceholderColor3 = Color3.new(0.7, 0.7, 0.7),
                 Font = Enum.Font.Gotham,
                 TextSize = 14,
                 TextColor3 = self.Theme.Text,
                 ClearTextOnFocus = false,
                 Parent = TextFrame
             })
-            Create("UICorner", {CornerRadius = UDim.new(0,4), Parent = Input})
+            Create("UICorner", {CornerRadius = UDim.new(0, 4), Parent = Input})
 
             Input.FocusLost:Connect(function(enterPressed)
                 txtConfig.Callback(Input.Text, enterPressed)
             end)
 
-            return {Get = function() return Input.Text end, Set = function(val) Input.Text = val end}
+            return {Get = function() return Input.Text end, Set = function(v) Input.Text = v end}
         end
 
         return TabAPI
@@ -767,8 +781,11 @@ function BA5IC:MakeWindow(config)
     task.spawn(function()
         task.wait(0.1)
         if #Tabs > 0 then
+            ContentArea:ClearAllChildren()
+            ContentLayout.Parent = ContentArea
             Tabs[1].Button.BackgroundTransparency = 0.7
-            Tabs[1].Button.BackgroundColor3 = BA5IC.Theme.Selected
+            Tabs[1].Button.BackgroundColor3 = self.Theme.Selected
+            ActiveTab = Tabs[1].Name
         end
     end)
 
