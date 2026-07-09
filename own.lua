@@ -1,7 +1,10 @@
---// WINDOW + SIDEBAR + SEARCH + SCROLL + RESPONSIVE RESIZE
---// Added: Scrollbars for Sidebar and Content Area
+--// VOIDWARE UI - FULL VERSION
+--// Features: Search, Scroll, Responsive Resize, Auto User Profile
+--// Ready to upload to GitHub
 
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local MyUILib = {}
 MyUILib.__index = MyUILib
 
@@ -11,7 +14,7 @@ pcall(function()
     Lucide = loadstring(game:HttpGet("https://raw.githubusercontent.com/latte-soft/lucide-roblox/refs/heads/master/lib/Icons.luau"))()
 end)
 
--- 🎨 SETTINGS
+-- 🎨 THEME SETTINGS
 MyUILib.Theme = {
     WindowBg = Color3.fromRGB(216, 128, 255),
     SidebarBg = Color3.fromRGB(90, 30, 130),
@@ -19,6 +22,7 @@ MyUILib.Theme = {
     SearchBg = Color3.fromRGB(70, 25, 110),
     TabHover = Color3.fromRGB(130, 50, 180),
     TabSelected = Color3.fromRGB(150, 60, 210),
+    UserProfileBg = Color3.fromRGB(80, 28, 120),
     ScrollbarColor = Color3.fromRGB(180, 100, 220),
     IconColor = Color3.new(1, 1, 1),
     IconTransparency = 0.2,
@@ -39,6 +43,7 @@ MyUILib.Theme = {
     MinimizedBarPos = UDim2.new(0.5, -120, 0, 12),
     HeaderHeight = 36,
     SidebarWidth = 160,
+    UserProfileHeight = 60,
     MinWindowWidth = 420,
     MinWindowHeight = 280,
     TweenTime = 0.3,
@@ -48,7 +53,7 @@ MyUILib.Theme = {
     MinimizedTransparency = 0.4
 }
 
--- 🧱 Base Class
+-- 🧱 BASE CLASS
 local Base = {}
 Base.__index = Base
 function Base.new(class, props)
@@ -62,7 +67,7 @@ function Base.new(class, props)
     return self
 end
 
--- 🪟 Create Window
+-- 🪟 CREATE WINDOW
 function MyUILib:CreateWindow()
     local Window = Base.new("Frame", {
         BackgroundColor3 = self.Theme.WindowBg,
@@ -79,14 +84,14 @@ function MyUILib:CreateWindow()
     Border.Transparency = 0.8
     Border.Thickness = 1
 
-    -- 📌 Header / Drag Area
+    -- 📌 HEADER / DRAG AREA
     local DragArea = Base.new("Frame", {
         Size = UDim2.new(1, 0, 0, self.Theme.HeaderHeight),
         BackgroundTransparency = 1,
         Parent = Window.Instance
     })
 
-    -- 📝 Header Container (Icon + Title + Subtitle)
+    -- 📝 HEADER CONTENT
     local HeaderContainer = Base.new("Frame", {
         Size = UDim2.new(0, 260, 1, 0),
         Position = UDim2.new(0, 12, 0, 0),
@@ -94,7 +99,7 @@ function MyUILib:CreateWindow()
         Parent = DragArea.Instance
     })
 
-    -- 🖼️ Header Icon
+    -- 🖼️ HEADER ICON
     local HeaderIcon = Base.new("ImageLabel", {
         Size = UDim2.new(0, self.Theme.HeaderIconSize, 0, self.Theme.HeaderIconSize),
         Position = UDim2.new(0, 0, 0.5, -self.Theme.HeaderIconSize/2),
@@ -121,7 +126,7 @@ function MyUILib:CreateWindow()
         })
     end
 
-    -- 📄 Title + Subtitle
+    -- 📄 TITLE + SUBTITLE
     local TextContainer = Base.new("Frame", {
         Size = UDim2.new(0, 220, 1, 0),
         Position = UDim2.new(0, self.Theme.HeaderIconSize + 10, 0, 4),
@@ -155,7 +160,7 @@ function MyUILib:CreateWindow()
         Parent = TextContainer.Instance
     })
 
-    -- 🎛️ Control Buttons
+    -- 🎛️ CONTROL BUTTONS
     local Controls = Base.new("Frame", {
         Size = UDim2.new(0, 88, 0, 28),
         Position = UDim2.new(1, -96, 0, 4),
@@ -266,7 +271,7 @@ function MyUILib:CreateWindow()
 
     -- ✅ SCROLL FRAME FOR TABS
     local SidebarScroll = Base.new("ScrollingFrame", {
-        Size = UDim2.new(1, 0, 1, -48),
+        Size = UDim2.new(1, 0, 1, -48 - self.Theme.UserProfileHeight),
         Position = UDim2.new(0, 0, 0, 48),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
@@ -276,6 +281,70 @@ function MyUILib:CreateWindow()
         Parent = Sidebar.Instance
     })
     SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+    -- ✅ AUTO USER PROFILE SECTION (LIKE ORION UI)
+    local UserProfile = Base.new("Frame", {
+        Size = UDim2.new(1, 0, 0, self.Theme.UserProfileHeight),
+        Position = UDim2.new(0, 0, 1, -self.Theme.UserProfileHeight),
+        BackgroundColor3 = self.Theme.UserProfileBg,
+        BackgroundTransparency = 0.1,
+        Parent = Sidebar.Instance
+    })
+    Instance.new("UICorner", UserProfile.Instance).CornerRadius = UDim.new(0, 6)
+
+    -- User Avatar
+    local UserAvatar = Base.new("ImageLabel", {
+        Size = UDim2.new(0, 40, 0, 40),
+        Position = UDim2.new(0, 8, 0.5, -20),
+        BackgroundTransparency = 0,
+        BackgroundColor3 = Color3.new(0,0,0),
+        Parent = UserProfile.Instance
+    })
+    Instance.new("UICorner", UserAvatar.Instance).CornerRadius = UDim.new(0, 8)
+
+    -- Auto-load avatar thumbnail
+    local thumbType = Enum.ThumbnailType.HeadShot
+    local thumbSize = Enum.ThumbnailSize.Size420x420
+    local success, avatarUrl = pcall(Players.GetUserThumbnailAsync, Players, LocalPlayer.UserId, thumbType, thumbSize)
+    if success then
+        UserAvatar.Instance.Image = avatarUrl
+    else
+        UserAvatar.Instance.Image = "rbxassetid://6034220868" -- Default fallback
+    end
+
+    -- Username & Display Name
+    local UserInfoContainer = Base.new("Frame", {
+        Size = UDim2.new(1, -56, 1, 0),
+        Position = UDim2.new(0, 52, 0, 0),
+        BackgroundTransparency = 1,
+        Parent = UserProfile.Instance
+    })
+
+    Base.new("TextLabel", {
+        Text = LocalPlayer.DisplayName or LocalPlayer.Name,
+        Font = Enum.Font.GothamBold,
+        TextSize = 15,
+        TextColor3 = self.Theme.TextColor,
+        TextTransparency = 0.15,
+        Size = UDim2.new(1, 0, 0, 20),
+        Position = UDim2.new(0, 0, 0, 8),
+        BackgroundTransparency = 1,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = UserInfoContainer.Instance
+    })
+
+    Base.new("TextLabel", {
+        Text = "@" .. LocalPlayer.Name,
+        Font = Enum.Font.Gotham,
+        TextSize = 12,
+        TextColor3 = self.Theme.TextColor,
+        TextTransparency = 0.35,
+        Size = UDim2.new(1, 0, 0, 16),
+        Position = UDim2.new(0, 0, 0, 28),
+        BackgroundTransparency = 1,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        Parent = UserInfoContainer.Instance
+    })
 
     -- 📌 RIGHT CONTENT AREA WITH SCROLL
     local ContentScroll = Base.new("ScrollingFrame", {
@@ -297,7 +366,7 @@ function MyUILib:CreateWindow()
         {Name = "Search", Icon = "search"},
         {Name = "Information", Icon = "info"},
         {Name = "Fun", Icon = "star"},
-        {Name = "Main", Icon = "code"},
+        {Name = "Main", Icon = "code-xml"},
         {Name = "Auto", Icon = "refresh-cw"},
         {Name = "Update Focused", Icon = "crosshair"},
         {Name = "Day Farm", Icon = "sun"},
@@ -387,7 +456,7 @@ function MyUILib:CreateWindow()
         table.insert(TabButtons, {Button = TabBtn.Instance, Name = tabData.Name})
     end
 
-    -- ✅ Update sidebar scroll height
+    -- ✅ Update scroll height
     SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, #Tabs * 42)
 
     -- ✅ Search filter
@@ -416,7 +485,7 @@ function MyUILib:CreateWindow()
         TabButtons[1].Button.BackgroundColor3 = self.Theme.TabSelected
     end
 
-    -- 📌 Minimize / Restore
+    -- 📌 MINIMIZE / RESTORE
     local IsMinimized = false
     local IsMaximized = false
     local TweenInfo = TweenInfo.new(self.Theme.TweenTime, self.Theme.TweenStyle, self.Theme.TweenDirection)
@@ -474,7 +543,7 @@ function MyUILib:CreateWindow()
         Window.Instance:Destroy()
     end)
 
-    -- 🖱️ Drag Logic
+    -- 🖱️ DRAG LOGIC
     local UIS = game:GetService("UserInputService")
     local Dragging = false
     local StartPos, StartInputPos
@@ -514,7 +583,7 @@ function MyUILib:CreateWindow()
         )
     end)
 
-    -- ✅ FIXED RESIZE LOGIC
+    -- ✅ RESIZE LOGIC
     local ResizeGrip = Base.new("Frame", {
         Size = UDim2.new(0, 30, 0, 30),
         Position = UDim2.new(1, 0, 1, 0),
@@ -558,12 +627,12 @@ function MyUILib:CreateWindow()
     return Window
 end
 
--- 🚀 Initialize
+-- 🚀 INITIALIZE UI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "VoidwareUI"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local Window = MyUILib:CreateWindow()
 Window.Instance.Parent = ScreenGui
