@@ -1,7 +1,7 @@
 --[[
 BA5IC UI LIBRARY
 Created by: Ikaw
-Style: Similar to Orion / Rayfield / Kavo
+Style: Orion / Rayfield / Kavo
 Features: Window, Tabs, Sections, Buttons, Toggles, Sliders, Dropdowns, Textboxes, Notifications
 ]]
 
@@ -39,7 +39,7 @@ BA5IC.Theme = {
     MinH = 280
 }
 
--- Helper function para gumawa ng mga UI elements
+-- Helper function
 local function Create(class, props)
     local obj = Instance.new(class)
     for k, v in pairs(props or {}) do
@@ -48,7 +48,7 @@ local function Create(class, props)
     return obj
 end
 
--- 📢 NOTIFICATION SYSTEM
+-- Notification System
 function BA5IC:Notify(title, text, duration)
     duration = duration or 3
     pcall(function()
@@ -61,11 +61,10 @@ function BA5IC:Notify(title, text, duration)
     end)
 end
 
--- 🪟 GUMAWA NG WINDOW
+-- Main Window
 function BA5IC:MakeWindow(config)
     config = config or {}
     config.Name = config.Name or "BA5IC UI"
-    config.SaveConfig = config.SaveConfig or false
 
     local ScreenGui = Create("ScreenGui", {
         Name = "BA5IC_UI",
@@ -85,13 +84,14 @@ function BA5IC:MakeWindow(config)
     Create("UICorner", {CornerRadius = self.Theme.Corner, Parent = MainWindow})
     Create("UIStroke", {Color = Color3.new(0,0,0), Transparency = 0.8, Thickness = 1, Parent = MainWindow})
 
-    -- Header / Drag Area
+    -- Header / Title Area
     local Header = Create("Frame", {
         Size = UDim2.new(1,0,0, self.Theme.HeaderHeight),
         BackgroundTransparency = 1,
         Parent = MainWindow
     })
 
+    -- Window Title
     Create("TextLabel", {
         Text = config.Name,
         Font = Enum.Font.GothamBold,
@@ -104,10 +104,10 @@ function BA5IC:MakeWindow(config)
         Parent = Header
     })
 
-    -- Control Buttons
+    -- Control Buttons (Minimize, Close)
     local Controls = Create("Frame", {
-        Size = UDim2.new(0, 88, 0, 28),
-        Position = UDim2.new(1, -96, 0, 4),
+        Size = UDim2.new(0, 60, 0, 28),
+        Position = UDim2.new(1, -68, 0, 4),
         BackgroundTransparency = 1,
         Parent = Header
     })
@@ -133,10 +133,9 @@ function BA5IC:MakeWindow(config)
     end
 
     local MinBtn = MakeBtn("—", 0)
-    local MaxBtn = MakeBtn("⛶", 32)
-    local CloseBtn = MakeBtn("✕", 64)
+    local CloseBtn = MakeBtn("✕", 32)
 
-    -- Main Content
+    -- Main Content Container
     local MainContent = Create("Frame", {
         Size = UDim2.new(1,0,1, -self.Theme.HeaderHeight),
         Position = UDim2.new(0,0,0, self.Theme.HeaderHeight),
@@ -189,7 +188,7 @@ function BA5IC:MakeWindow(config)
         Parent = SearchBox
     })
 
-    -- Sidebar Scroll
+    -- Sidebar Scroll Frame
     local SidebarScroll = Create("ScrollingFrame", {
         Size = UDim2.new(1,0,1, -48 - self.Theme.UserHeight),
         Position = UDim2.new(0,0,0,48),
@@ -199,9 +198,16 @@ function BA5IC:MakeWindow(config)
         ScrollBarImageColor3 = self.Theme.Scroll,
         Parent = Sidebar
     })
-    Create("UIListLayout", {SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0,6), Parent = SidebarScroll})
+    local SidebarLayout = Create("UIListLayout", {
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Padding = UDim.new(0,6),
+        Parent = SidebarScroll
+    })
+    SidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        SidebarScroll.CanvasSize = UDim2.new(0, 0, 0, SidebarLayout.AbsoluteContentSize.Y + 10)
+    end)
 
-    -- User Profile
+    -- User Profile Section
     local UserFrame = Create("Frame", {
         Size = UDim2.new(1,0,0, self.Theme.UserHeight),
         Position = UDim2.new(0,0,1, -self.Theme.UserHeight),
@@ -224,6 +230,7 @@ function BA5IC:MakeWindow(config)
     end)
 
     Create("TextLabel", {
+        Name = "DisplayName",
         Text = LocalPlayer.DisplayName,
         Font = Enum.Font.GothamBold,
         TextSize = 15,
@@ -235,6 +242,7 @@ function BA5IC:MakeWindow(config)
         Parent = UserFrame
     })
     Create("TextLabel", {
+        Name = "Username",
         Text = "@"..LocalPlayer.Name,
         Font = Enum.Font.Gotham,
         TextSize = 12,
@@ -275,13 +283,21 @@ function BA5IC:MakeWindow(config)
         ContentArea.CanvasSize = UDim2.new(1, 0, 0, ContentLayout.AbsoluteContentSize.Y + 20)
     end)
 
-    -- Drag Function
+    -- Drag Logic
     local Dragging, StartPos, StartMouse = false
     Header.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            Dragging = true
-            StartPos = MainWindow.Position
-            StartMouse = Vector2.new(input.Position.X, input.Position.Y)
+            local pos = input.Position
+            local overControls = 
+                pos.X >= Controls.AbsolutePosition.X and 
+                pos.X <= Controls.AbsolutePosition.X + Controls.AbsoluteSize.X and
+                pos.Y >= Controls.AbsolutePosition.Y and 
+                pos.Y <= Controls.AbsolutePosition.Y + Controls.AbsoluteSize.Y
+            if not overControls then
+                Dragging = true
+                StartPos = MainWindow.Position
+                StartMouse = Vector2.new(input.Position.X, input.Position.Y)
+            end
         end
     end)
     UserInputService.InputChanged:Connect(function(input)
@@ -290,9 +306,9 @@ function BA5IC:MakeWindow(config)
             MainWindow.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + delta.X, StartPos.Y.Scale, StartPos.Y.Offset + delta.Y)
         end
     end)
-    Header.InputEnded:Connect(function() Dragging = false end)
+    UserInputService.InputEnded:Connect(function() Dragging = false end)
 
-    -- Minimize / Maximize / Close
+    -- Minimize / Close
     local IsMinimized = false
     MinBtn.MouseButton1Click:Connect(function()
         if not IsMinimized then
@@ -317,7 +333,6 @@ function BA5IC:MakeWindow(config)
     local Tabs = {}
     local WindowAPI = {}
 
-    -- 📑 GUMAWA NG TAB
     function WindowAPI:MakeTab(tabConfig)
         tabConfig = tabConfig or {}
         tabConfig.Name = tabConfig.Name or "New Tab"
@@ -355,7 +370,11 @@ function BA5IC:MakeWindow(config)
         })
 
         TabBtn.MouseButton1Click:Connect(function()
-            for _,t in ipairs(Tabs) do t.Button.BackgroundTransparency = 1 end
+            ContentArea:ClearAllChildren()
+            ContentLayout.Parent = ContentArea
+            for _,t in ipairs(Tabs) do
+                t.Button.BackgroundTransparency = 1
+            end
             TabBtn.BackgroundTransparency = 0.7
             TabBtn.BackgroundColor3 = self.Theme.Selected
         end)
@@ -374,10 +393,9 @@ function BA5IC:MakeWindow(config)
 
         table.insert(Tabs, {Name = tabConfig.Name, Button = TabBtn})
 
-        -- Tab Elements API
+        -- Tab Elements
         local TabAPI = {}
 
-        -- ➕ SECTION
         function TabAPI:AddSection(name)
             local Section = Create("Frame", {
                 Size = UDim2.new(1, 0, 0, 30),
@@ -400,7 +418,6 @@ function BA5IC:MakeWindow(config)
             return Section
         end
 
-        -- ➕ BUTTON
         function TabAPI:AddButton(btnConfig)
             btnConfig = btnConfig or {}
             btnConfig.Name = btnConfig.Name or "Button"
@@ -435,7 +452,6 @@ function BA5IC:MakeWindow(config)
             return Btn
         end
 
-        -- ➕ TOGGLE
         function TabAPI:AddToggle(togConfig)
             togConfig = togConfig or {}
             togConfig.Name = togConfig.Name or "Toggle"
@@ -498,13 +514,9 @@ function BA5IC:MakeWindow(config)
                 UpdateToggle()
             end)
 
-            return {
-                Get = function() return State end,
-                Set = function(val) State = val; UpdateToggle() end
-            }
+            return {Get = function() return State end, Set = function(v) State = v; UpdateToggle() end}
         end
 
-        -- ➕ SLIDER
         function TabAPI:AddSlider(sldConfig)
             sldConfig = sldConfig or {}
             sldConfig.Name = sldConfig.Name or "Slider"
@@ -522,7 +534,7 @@ function BA5IC:MakeWindow(config)
             })
             Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = SliderFrame})
 
-            local NameLabel = Create("TextLabel", {
+            Create("TextLabel", {
                 Text = sldConfig.Name,
                 Font = Enum.Font.GothamSemibold,
                 TextSize = 14,
@@ -587,19 +599,15 @@ function BA5IC:MakeWindow(config)
                 sldConfig.Callback(Value)
             end)
 
-            return {
-                Get = function() return Value end,
-                Set = function(v)
-                    Value = math.clamp(v, sldConfig.Min, sldConfig.Max)
-                    local rel = (Value - sldConfig.Min)/(sldConfig.Max - sldConfig.Min)
-                    SliderFill.Size = UDim2.new(rel,0,1,0)
-                    SliderKnob.Position = UDim2.new(rel, -7, 0.5, -7)
-                    ValueLabel.Text = tostring(Value)
-                end
-            }
+            return {Get = function() return Value end, Set = function(v)
+                Value = math.clamp(v, sldConfig.Min, sldConfig.Max)
+                local rel = (Value - sldConfig.Min)/(sldConfig.Max - sldConfig.Min)
+                SliderFill.Size = UDim2.new(rel,0,1,0)
+                SliderKnob.Position = UDim2.new(rel, -7, 0.5, -7)
+                ValueLabel.Text = tostring(Value)
+            end}
         end
 
-        -- ➕ DROPDOWN
         function TabAPI:AddDropdown(dropConfig)
             dropConfig = dropConfig or {}
             dropConfig.Name = dropConfig.Name or "Dropdown"
@@ -617,8 +625,8 @@ function BA5IC:MakeWindow(config)
             })
             Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = DropFrame})
 
-            Create("TextLabel", {
-                Text = dropConfig.Name,
+            local NameLabel = Create("TextLabel", {
+                Text = dropConfig.Name .. ": " .. Selected,
                 Font = Enum.Font.GothamSemibold,
                 TextSize = 14,
                 TextColor3 = self.Theme.Text,
@@ -670,10 +678,9 @@ function BA5IC:MakeWindow(config)
                     Create("UICorner", {CornerRadius = self.Theme.SmallCorner, Parent = OptBtn})
                     OptBtn.MouseButton1Click:Connect(function()
                         Selected = opt
-                        DropFrame:FindFirstChild("NameLabel").Text = dropConfig.Name .. ": " .. Selected
+                        NameLabel.Text = dropConfig.Name .. ": " .. Selected
                         Open = false
                         OptionsFrame.Visible = false
-                        OptionsFrame.Size = UDim2.new(1,0,0,0)
                         Arrow.Text = "▼"
                         dropConfig.Callback(Selected)
                     end)
@@ -682,7 +689,6 @@ function BA5IC:MakeWindow(config)
             end
 
             BuildOptions()
-            DropFrame:FindFirstChild("NameLabel").Text = dropConfig.Name .. ": " .. Selected
 
             local ClickArea = Create("TextButton", {
                 Size = UDim2.new(1,0,1,0),
@@ -702,14 +708,9 @@ function BA5IC:MakeWindow(config)
                 end
             end)
 
-            return {
-                Get = function() return Selected end,
-                Set = function(val) Selected = val; DropFrame:FindFirstChild("NameLabel").Text = dropConfig.Name .. ": " .. val; dropConfig.Callback(val) end,
-                Refresh = function(newOpts) dropConfig.Options = newOpts; BuildOptions() end
-            }
+            return {Get = function() return Selected end, Set = function(val) Selected = val; NameLabel.Text = dropConfig.Name .. ": " .. val; dropConfig.Callback(val) end}
         end
 
-        -- ➕ TEXTBOX
         function TabAPI:AddTextBox(txtConfig)
             txtConfig = txtConfig or {}
             txtConfig.Name = txtConfig.Name or "Input"
@@ -757,16 +758,12 @@ function BA5IC:MakeWindow(config)
                 txtConfig.Callback(Input.Text, enterPressed)
             end)
 
-            return {
-                Get = function() return Input.Text end,
-                Set = function(val) Input.Text = val end
-            }
+            return {Get = function() return Input.Text end, Set = function(val) Input.Text = val end}
         end
 
         return TabAPI
     end
 
-    -- Piliin ang unang tab bilang default
     task.spawn(function()
         task.wait(0.1)
         if #Tabs > 0 then
