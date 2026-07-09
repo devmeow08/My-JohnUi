@@ -1,10 +1,12 @@
 --[[
     Voidware UI Library
-    Features: Fully Responsive, Scrollable, Searchable, Smooth Animations
+    Fixed: Window not showing, fully responsive
 ]]
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
 local MyUILib = {}
 MyUILib.__index = MyUILib
@@ -68,18 +70,24 @@ end
 
 -- 🪟 CREATE WINDOW
 function MyUILib:CreateWindow()
+    -- ✅ Fixed ScreenGui Creation
+    local ScreenGui = Instance.new("ScreenGui")
+    ScreenGui.Name = "VoidwareUI"
+    ScreenGui.ResetOnSpawn = false
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+    -- Main Window
     local Window = Base.new("Frame", {
         BackgroundColor3 = self.Theme.WindowBg,
         BackgroundTransparency = self.Theme.NormalTransparency,
         Size = self.Theme.NormalWindowSize,
         Position = self.Theme.NormalWindowPos,
         ClipsDescendants = true,
+        Visible = true,
         ZIndex = 10,
-        Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):FindFirstChild("VoidwareUI") or Instance.new("ScreenGui")
+        Parent = ScreenGui
     })
-    Window.Instance.Parent.Name = "VoidwareUI"
-    Window.Instance.Parent.ResetOnSpawn = false
-    Window.Instance.Parent.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
     Instance.new("UICorner", Window.Instance).CornerRadius = self.Theme.CornerRadius
     local Border = Instance.new("UIStroke", Window.Instance)
@@ -182,7 +190,7 @@ function MyUILib:CreateWindow()
     local MaximizeBtn = CreateBtn("maximize", 32)
     local CloseBtn = CreateBtn("x", 64)
 
-    -- 📄 MAIN CONTAINER (100% Responsive Base)
+    -- 📄 MAIN CONTAINER
     local MainContainer = Base.new("Frame", {
         Size = UDim2.new(1, 0, 1, -self.Theme.HeaderHeight),
         Position = UDim2.new(0, 0, 0, self.Theme.HeaderHeight),
@@ -238,7 +246,7 @@ function MyUILib:CreateWindow()
         Parent = SearchBox.Instance
     })
 
-    -- ✅ SCROLLABLE SIDEBAR CONTENT
+    -- ✅ SCROLLABLE SIDEBAR
     local SidebarScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, 0, 1, -48),
         Position = UDim2.new(0, 0, 0, 48),
@@ -251,7 +259,7 @@ function MyUILib:CreateWindow()
         Parent = Sidebar.Instance
     })
 
-    -- 📌 RIGHT CONTENT AREA (FULLY RESPONSIVE)
+    -- 📌 RIGHT CONTENT AREA
     local ContentScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, -self.Theme.SidebarWidth, 1, 0),
         Position = UDim2.new(0, self.Theme.SidebarWidth, 0, 0),
@@ -261,7 +269,7 @@ function MyUILib:CreateWindow()
         ScrollBarThickness = 6,
         ScrollBarImageColor3 = self.Theme.ScrollbarColor,
         VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
-        CanvasSize = UDim2.new(1, 0, 0, 1000),
+        CanvasSize = UDim2.new(1, 0, 0, 300),
         Parent = MainContainer.Instance
     })
     Instance.new("UICorner", ContentScroll.Instance).CornerRadius = self.Theme.CornerRadius
@@ -326,12 +334,12 @@ function MyUILib:CreateWindow()
             TabBtn.Instance.BackgroundColor3 = self.Theme.TabSelected
             CurrentTab = tabData.Name
 
-            -- 📝 EXAMPLE RESPONSIVE CONTENT
+            -- Responsive Content Example
             ContentScroll.Instance:ClearAllChildren()
             ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 300)
 
             Base.new("TextLabel", {
-                Text = "Tab: "..CurrentTab,
+                Text = "Content: "..CurrentTab,
                 Font = Enum.Font.GothamBold,
                 TextSize = 18,
                 TextColor3 = self.Theme.TextColor,
@@ -339,20 +347,6 @@ function MyUILib:CreateWindow()
                 Size = UDim2.new(1, -20, 0, 30),
                 Position = UDim2.new(0, 10, 0, 10),
                 TextXAlignment = Enum.TextXAlignment.Left,
-                Parent = ContentScroll.Instance
-            })
-
-            -- Example responsive button
-            Base.new("TextButton", {
-                Text = "Sample Button",
-                Font = Enum.Font.GothamSemibold,
-                TextSize = 14,
-                TextColor3 = self.Theme.TextColor,
-                BackgroundColor3 = self.Theme.SidebarBg,
-                BackgroundTransparency = 0.2,
-                Size = UDim2.new(1, -20, 0, 36),
-                Position = UDim2.new(0, 10, 0, 50),
-                AutoButtonColor = false,
                 Parent = ContentScroll.Instance
             })
         end)
@@ -474,7 +468,7 @@ function MyUILib:CreateWindow()
     return Window
 end
 
--- 🚀 INITIALIZE
+-- 🚀 START
 MyUILib:CreateWindow()
 
 return MyUILib
