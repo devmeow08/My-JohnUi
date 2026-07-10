@@ -37,7 +37,7 @@ MyUILib.Theme = {
     HeaderIconSize = 25,
     CornerRadius = UDim.new(0, 10),
     NormalWindowSize = UDim2.new(0, 450, 0, 530),
-    NormalWindowPos = UDim2.new(0.5, -325, 0.5, -225),
+    NormalWindowPos = UDim2.new(0.5, -225, 0.5, -265), -- ✅ Fixed position for 450x530
     MinimizedBarSize = UDim2.new(0, 240, 0, 36),
     MinimizedBarPos = UDim2.new(0.5, -120, 0, 12),
     HeaderHeight = 36,
@@ -477,12 +477,17 @@ function MyUILib:CreateWindow()
         TabButtons[1].Button.BackgroundColor3 = self.Theme.TabSelected
     end
 
-    -- 📌 MINIMIZE / RESTORE
+    -- 📌 MINIMIZE / RESTORE ✅ FIXED NOW
     local IsMinimized = false
     local IsMaximized = false
+    local SavedSize, SavedPos -- ✅ Save position/size before minimize
 
     MinimizeBtn.Instance.Activated:Connect(function()
         if not IsMinimized then
+            -- Save current state
+            SavedSize = Window.Instance.Size
+            SavedPos = Window.Instance.Position
+
             TweenService:Create(Window.Instance, TweenInfo, {
                 Size = self.Theme.MinimizedBarSize,
                 Position = self.Theme.MinimizedBarPos,
@@ -505,16 +510,18 @@ function MyUILib:CreateWindow()
             CloseBtn.Instance.Visible = true
             MaximizeBtn.Instance.Position = UDim2.new(0, 32, 0, 0)
 
+            -- Restore to saved position/size
             TweenService:Create(Window.Instance, TweenInfo, {
-                Size = self.Theme.NormalWindowSize,
-                Position = self.Theme.NormalWindowPos,
+                Size = SavedSize or self.Theme.NormalWindowSize,
+                Position = SavedPos or self.Theme.NormalWindowPos,
                 BackgroundTransparency = self.Theme.NormalTransparency
             }):Play()
             IsMinimized = false
         else
             if not IsMaximized then
-                self.Theme.NormalWindowSize = Window.Instance.Size
-                self.Theme.NormalWindowPos = Window.Instance.Position
+                -- Save before fullscreen
+                SavedSize = Window.Instance.Size
+                SavedPos = Window.Instance.Position
                 TweenService:Create(Window.Instance, TweenInfo, {
                     Size = UDim2.new(0.92, 0, 0.88, 0),
                     Position = UDim2.new(0.04, 0, 0, 0)
@@ -522,8 +529,8 @@ function MyUILib:CreateWindow()
                 IsMaximized = true
             else
                 TweenService:Create(Window.Instance, TweenInfo, {
-                    Size = self.Theme.NormalWindowSize,
-                    Position = self.Theme.NormalWindowPos
+                    Size = SavedSize or self.Theme.NormalWindowSize,
+                    Position = SavedPos or self.Theme.NormalWindowPos
                 }):Play()
                 IsMaximized = false
             end
