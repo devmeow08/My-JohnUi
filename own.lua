@@ -268,7 +268,7 @@ function MyUILib:CreateWindow()
         Parent = SearchBox.Instance
     })
 
-    -- ✅ SCROLL FRAME FOR TABS
+    -- ✅ SCROLL FRAME FOR TABS (MAY SCROLL PA RIN)
     local SidebarScroll = Base.new("ScrollingFrame", {
         Size = UDim2.new(1, 0, 1, -48 - self.Theme.UserProfileHeight),
         Position = UDim2.new(0, 0, 0, 48),
@@ -345,17 +345,13 @@ function MyUILib:CreateWindow()
         Parent = UserInfoContainer.Instance
     })
 
-    -- 📌 RIGHT CONTENT AREA
-    local ContentScroll = Base.new("ScrollingFrame", {
+    -- 📌 RIGHT CONTENT AREA (WALANG SCROLL)
+    local ContentScroll = Base.new("Frame", {
         Size = UDim2.new(1, -self.Theme.SidebarWidth, 1, 0),
         Position = UDim2.new(0, self.Theme.SidebarWidth, 0, 0),
         BackgroundColor3 = self.Theme.ContentBg,
         BackgroundTransparency = 0.1,
         BorderSizePixel = 0,
-        ScrollBarThickness = 6,
-        ScrollBarImageColor3 = self.Theme.ScrollbarColor,
-        VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right,
-        CanvasSize = UDim2.new(0, 0, 0, 0),
         Parent = MainContainer.Instance
     })
     Instance.new("UICorner", ContentScroll.Instance).CornerRadius = self.Theme.CornerRadius
@@ -436,7 +432,6 @@ function MyUILib:CreateWindow()
 
             CurrentTab = tabData.Name
             ContentScroll.Instance:ClearAllChildren()
-            ContentScroll.Instance.CanvasSize = UDim2.new(1, 0, 0, 100)
             Base.new("TextLabel", {
                 Text = "Content: "..CurrentTab,
                 Font = Enum.Font.GothamBold,
@@ -453,7 +448,7 @@ function MyUILib:CreateWindow()
         table.insert(TabButtons, {Button = TabBtn.Instance, Name = tabData.Name})
     end
 
-    -- ✅ Update scroll height
+    -- ✅ Update scroll height para sa tabs
     SidebarScroll.Instance.CanvasSize = UDim2.new(0, 0, 0, #Tabs * 42)
 
     -- ✅ Search filter
